@@ -4,12 +4,15 @@ import { GuiPresetsState } from '@/store/gui/presets/types'
 import { GuiRemoteprintersState } from '@/store/gui/remoteprinters/types'
 import { ServerHistoryStateJob } from '@/store/server/history/types'
 import { GuiNotificationState } from '@/store/gui/notifications/types'
-import { FileStateGcodefile } from '@/store/files/types'
+import { FileStateFile, FileStateGcodefile } from '@/store/files/types'
 
 export interface GuiState {
     general: {
         printername: string
         language: string
+        dateFormat: string | null
+        timeFormat: string | null
+        calcPrintProgress: 'file-relative' | 'file-absolute' | 'slicer' | 'filament'
         calcEstimateTime: string[] // file, filament are possible values
         calcEtaTime: string[] // file, filament, slicer are possible values
     }
@@ -103,6 +106,7 @@ export interface GuiState {
         navigationStyle: 'iconsAndText' | 'iconsOnly'
     }
     view: {
+        blockFileUpload: boolean
         configfiles: {
             countPerPage: number
             sortBy: string
@@ -111,6 +115,7 @@ export interface GuiState {
             hideBackupFiles: boolean
             currentPath: string
             rootPath: string
+            selectedFiles: FileStateFile[]
         }
         gcodefiles: {
             countPerPage: number
@@ -154,6 +159,7 @@ export interface GuiState {
             sortDesc: boolean
             showHiddenFiles: boolean
             currentPath: string
+            selectedFiles: FileStateFile[]
         }
         webcam: {
             currentCam: {

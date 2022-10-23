@@ -9,6 +9,7 @@ import { defaultLogoColor, defaultPrimaryColor } from '@/store/variables'
 import { console } from '@/store/gui/console'
 import { gcodehistory } from '@/store/gui/gcodehistory'
 import { macros } from '@/store/gui/macros'
+import { miscellaneous } from '@/store/gui/miscellaneous'
 import { presets } from '@/store/gui/presets'
 import { remoteprinters } from '@/store/gui/remoteprinters'
 import { webcams } from '@/store/gui/webcams'
@@ -19,6 +20,9 @@ export const getDefaultState = (): GuiState => {
         general: {
             printername: '',
             language: 'en',
+            dateFormat: null,
+            timeFormat: null,
+            calcPrintProgress: 'file-relative',
             calcEstimateTime: ['file', 'filament'],
             calcEtaTime: ['file', 'filament', 'slicer'],
         },
@@ -118,7 +122,7 @@ export const getDefaultState = (): GuiState => {
             maxFeed: 100,
             minFeedColor: '#2196f3',
             maxFeedColor: '#D41216',
-            progressColor: '#FFFFFFB2',
+            progressColor: '#ECECEC',
             showCursor: true,
             showTravelMoves: false,
             showObjectSelection: false,
@@ -150,6 +154,7 @@ export const getDefaultState = (): GuiState => {
             navigationStyle: 'iconsAndText',
         },
         view: {
+            blockFileUpload: false,
             configfiles: {
                 countPerPage: 10,
                 sortBy: 'filename',
@@ -158,6 +163,7 @@ export const getDefaultState = (): GuiState => {
                 hideBackupFiles: false,
                 currentPath: '',
                 rootPath: 'config',
+                selectedFiles: [],
             },
             gcodefiles: {
                 countPerPage: 10,
@@ -180,7 +186,7 @@ export const getDefaultState = (): GuiState => {
                     'last_print_duration',
                     'slicer',
                 ],
-                currentPath: 'gcodes',
+                currentPath: '',
                 selectedFiles: [],
             },
             heightmap: {
@@ -225,6 +231,7 @@ export const getDefaultState = (): GuiState => {
                 sortDesc: true,
                 showHiddenFiles: false,
                 currentPath: 'timelapse',
+                selectedFiles: [],
             },
             webcam: {
                 currentCam: {
@@ -249,6 +256,7 @@ export const gui: Module<GuiState, any> = {
         console,
         gcodehistory,
         macros,
+        miscellaneous,
         notifications,
         presets,
         remoteprinters,

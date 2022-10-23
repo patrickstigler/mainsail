@@ -1,30 +1,3 @@
-<style lang="scss" scoped>
-._transition i::before {
-    transition: transform 500ms;
-}
-._rotate-180:before {
-    transform: rotate(180deg);
-}
-
-.v-item-group {
-    button:hover::before,
-    button:focus::before {
-        opacity: 0 !important;
-    }
-    ._menu-button {
-        height: 40px;
-        width: 62px;
-        border: 1px solid rgba(255, 255, 255, 0.25) !important;
-    }
-    ._menu-button:hover {
-        border-color: rgba(255, 255, 255, 1) !important;
-    }
-    ._menu-button:focus {
-        border: 2px solid var(--color-primary) !important;
-    }
-}
-</style>
-
 <template>
     <div>
         <v-card v-if="!form.bool" flat>
@@ -32,7 +5,10 @@
                 <h3 class="text-h5 mb-3">{{ $t('Settings.WebcamsTab.Webcams') }}</h3>
                 <div v-for="webcam in webcams" :key="webcam.id">
                     <v-divider class="my-2"></v-divider>
-                    <settings-row :title="webcam.name" :icon="webcam.icon" :sub-title="getSubtitle(webcam)">
+                    <settings-row
+                        :title="webcam.name"
+                        :icon="convertWebcamIcon(webcam.icon)"
+                        :sub-title="getSubtitle(webcam)">
                         <v-btn small outlined @click="editWebcam(webcam)">
                             <v-icon small left>{{ mdiPencil }}</v-icon>
                             {{ $t('Settings.Edit') }}
@@ -48,7 +24,11 @@
                     </settings-row>
                 </div>
             </v-card-text>
-            <v-card-actions class="d-flex justify-end">
+            <v-card-actions>
+                <v-btn v-if="existCrowsnestConf" text color="primary" @click="openCrowsnestConf">
+                    {{ $t('Settings.WebcamsTab.EditCrowsnestConf') }}
+                </v-btn>
+                <v-spacer></v-spacer>
                 <v-btn text color="primary" @click="createWebcam">{{ $t('Settings.WebcamsTab.AddWebcam') }}</v-btn>
             </v-card-actions>
         </v-card>
@@ -63,7 +43,7 @@
                     <v-row>
                         <v-col class="col-12 col-sm-6">
                             <v-row>
-                                <v-col class="d-flex align-center">
+                                <v-col class="d-flex">
                                     <v-item-group>
                                         <v-menu :offset-y="true" title="Icon">
                                             <template #activator="{ on, attrs }">
@@ -76,7 +56,7 @@
                                                     v-on="on"
                                                     @blur="selectIcon = !selectIcon"
                                                     @focus="selectIcon = !selectIcon">
-                                                    <v-icon>{{ form.icon }}</v-icon>
+                                                    <v-icon>{{ convertWebcamIcon(form.icon) }}</v-icon>
                                                     <v-icon
                                                         :class="!selectIcon ? '' : '_rotate-180'"
                                                         :color="!selectIcon ? '' : 'primary'"
@@ -91,8 +71,10 @@
                                                     :key="icon.value"
                                                     link
                                                     @click="setFormIcon(icon.value)">
-                                                    <v-list-item-icon class="mr-0">
-                                                        <v-icon small>{{ icon.value }}</v-icon>
+                                                    <v-list-item-icon class="mr-2">
+                                                        <v-icon small class="mt-1">
+                                                            {{ convertWebcamIcon(icon.value) }}
+                                                        </v-icon>
                                                     </v-list-item-icon>
                                                     <v-list-item-content>
                                                         <v-list-item-title v-text="icon.text"></v-list-item-title>
@@ -107,6 +89,7 @@
                                         hide-details="auto"
                                         outlined
                                         :rules="[rules.required, rules.unique]"
+                                        class="_webcam-settings-name-field"
                                         dense></v-text-field>
                                 </v-col>
                             </v-row>
@@ -149,7 +132,7 @@
                                 </v-col>
                             </v-row>
                             <v-row v-if="form.service === 'mjpegstreamer-adaptive'">
-                                <v-col class="py-2">
+                                <v-col class="py-2 col-6">
                                     <v-text-field
                                         v-model="form.targetFps"
                                         outlined
@@ -157,23 +140,37 @@
                                         hide-details
                                         :label="$t('Settings.WebcamsTab.TargetFPS')"></v-text-field>
                                 </v-col>
-                            </v-row>
-                            <v-row>
-                                <v-col class="py-1">
-                                    <v-checkbox
-                                        v-model="form.flipX"
+                                <v-col class="py-2 col-6">
+                                    <v-select
+                                        v-model="form.rotate"
+                                        :items="rotateItems"
+                                        outlined
+                                        dense
                                         hide-details
-                                        class="mt-1"
-                                        :label="$t('Settings.WebcamsTab.FlipHorizontally')"></v-checkbox>
+                                        :label="$t('Settings.WebcamsTab.Rotate')"></v-select>
                                 </v-col>
                             </v-row>
                             <v-row>
-                                <v-col class="py-1">
+                                <v-col class="pt-1 pb-3">
+                                    <div class="v-label v-label--active theme--dark text-subtitle-1">
+                                        {{ $t('Settings.WebcamsTab.FlipWebcam') }}
+                                    </div>
+                                </v-col>
+                            </v-row>
+                            <v-row class="mt-0">
+                                <v-col class="py-0">
+                                    <v-checkbox
+                                        v-model="form.flipX"
+                                        class="mt-1"
+                                        hide-details
+                                        :label="$t('Settings.WebcamsTab.Horizontally')"></v-checkbox>
+                                </v-col>
+                                <v-col class="py-0">
                                     <v-checkbox
                                         v-model="form.flipY"
-                                        hide-details
                                         class="mt-1"
-                                        :label="$t('Settings.WebcamsTab.FlipVertically')"></v-checkbox>
+                                        hide-details
+                                        :label="$t('Settings.WebcamsTab.Vertically')"></v-checkbox>
                                 </v-col>
                             </v-row>
                         </v-col>
@@ -202,7 +199,7 @@
                     <v-btn text @click="form.bool = false">
                         {{ $t('Settings.Cancel') }}
                     </v-btn>
-                    <v-btn color="primary" text type="submit">
+                    <v-btn color="primary" text type="submit" :disabled="!form.name">
                         {{
                             form.id === null
                                 ? $t('Settings.WebcamsTab.SaveWebcam')
@@ -224,19 +221,9 @@ import Mjpegstreamer from '@/components/webcams/Mjpegstreamer.vue'
 import MjpegstreamerAdaptive from '@/components/webcams/MjpegstreamerAdaptive.vue'
 import Uv4lMjpeg from '@/components/webcams/Uv4lMjpeg.vue'
 import Ipstreamer from '@/components/webcams/Ipstreamer.vue'
-import {
-    mdiAlbum,
-    mdiCampfire,
-    mdiDoor,
-    mdiMenuDown,
-    mdiDelete,
-    mdiPencil,
-    mdiPrinter3d,
-    mdiPrinter3dNozzle,
-    mdiRadiatorDisabled,
-    mdiRaspberryPi,
-    mdiWebcam,
-} from '@mdi/js'
+import { mdiMenuDown, mdiDelete, mdiPencil, mdiWebcam } from '@mdi/js'
+import WebcamMixin from '@/components/mixins/webcam'
+import { FileStateFile } from '@/store/files/types'
 
 interface webcamForm {
     bool: boolean
@@ -248,6 +235,7 @@ interface webcamForm {
     targetFps: number
     urlStream: string
     urlSnapshot: string
+    rotate: number
     flipX: boolean
     flipY: boolean
 }
@@ -261,7 +249,7 @@ interface webcamForm {
         'webcam-ipstreamer': Ipstreamer,
     },
 })
-export default class SettingsWebcamsTab extends Mixins(BaseMixin) {
+export default class SettingsWebcamsTab extends Mixins(BaseMixin, WebcamMixin) {
     mdiPencil = mdiPencil
     mdiDelete = mdiDelete
     mdiMenuDown = mdiMenuDown
@@ -278,6 +266,7 @@ export default class SettingsWebcamsTab extends Mixins(BaseMixin) {
         targetFps: 15,
         urlStream: '',
         urlSnapshot: '',
+        rotate: 0,
         flipX: false,
         flipY: false,
     }
@@ -286,6 +275,13 @@ export default class SettingsWebcamsTab extends Mixins(BaseMixin) {
         required: (value: string) => value !== '' || this.$t('Settings.WebcamsTab.Required'),
         unique: (value: string) => !this.existsWebcamName(value) || this.$t('Settings.WebcamsTab.NameAlreadyExists'),
     }
+
+    private rotateItems = [
+        { value: 0, text: '0°' },
+        { value: 90, text: '90°' },
+        { value: 180, text: '180°' },
+        { value: 270, text: '270°' },
+    ]
 
     declare $refs: {
         webcamForm: any
@@ -297,14 +293,14 @@ export default class SettingsWebcamsTab extends Mixins(BaseMixin) {
 
     get iconItems() {
         return [
-            { value: mdiPrinter3d, text: this.$t('Settings.WebcamsTab.IconPrinter') },
-            { value: mdiPrinter3dNozzle, text: this.$t('Settings.WebcamsTab.IconNozzle') },
-            { value: mdiRadiatorDisabled, text: this.$t('Settings.WebcamsTab.IconBed') },
-            { value: mdiWebcam, text: this.$t('Settings.WebcamsTab.IconCam') },
-            { value: mdiAlbum, text: this.$t('Settings.WebcamsTab.IconFilament') },
-            { value: mdiDoor, text: this.$t('Settings.WebcamsTab.IconDoor') },
-            { value: mdiRaspberryPi, text: this.$t('Settings.WebcamsTab.IconMcu') },
-            { value: mdiCampfire, text: this.$t('Settings.WebcamsTab.IconHot') },
+            { value: 'mdiPrinter3d', text: this.$t('Settings.WebcamsTab.IconPrinter') },
+            { value: 'mdiPrinter3dNozzle', text: this.$t('Settings.WebcamsTab.IconNozzle') },
+            { value: 'mdiRadiatorDisabled', text: this.$t('Settings.WebcamsTab.IconBed') },
+            { value: 'mdiWebcam', text: this.$t('Settings.WebcamsTab.IconCam') },
+            { value: 'mdiAlbum', text: this.$t('Settings.WebcamsTab.IconFilament') },
+            { value: 'mdiDoor', text: this.$t('Settings.WebcamsTab.IconDoor') },
+            { value: 'mdiRaspberryPi', text: this.$t('Settings.WebcamsTab.IconMcu') },
+            { value: 'mdiCampfire', text: this.$t('Settings.WebcamsTab.IconHot') },
         ]
     }
 
@@ -326,6 +322,18 @@ export default class SettingsWebcamsTab extends Mixins(BaseMixin) {
         }
 
         return ''
+    }
+
+    get configfiles() {
+        return this.$store.getters['files/getDirectory']('config')?.childrens ?? []
+    }
+
+    get crowsnestConf(): FileStateFile | null {
+        return this.configfiles.find((file: FileStateFile) => file.filename === 'crowsnest.conf')
+    }
+
+    get existCrowsnestConf(): boolean {
+        return this.configfiles.findIndex((file: FileStateFile) => file.filename === 'crowsnest.conf') !== -1
     }
 
     getSubtitle(webcam: GuiWebcamStateWebcam) {
@@ -354,6 +362,7 @@ export default class SettingsWebcamsTab extends Mixins(BaseMixin) {
         this.form.targetFps = webcam.targetFps
         this.form.urlStream = webcam.urlStream
         this.form.urlSnapshot = webcam.urlSnapshot
+        this.form.rotate = webcam.rotate ?? 0
         this.form.flipX = webcam.flipX
         this.form.flipY = webcam.flipY
 
@@ -374,6 +383,7 @@ export default class SettingsWebcamsTab extends Mixins(BaseMixin) {
                 targetFps: this.form.targetFps,
                 urlStream: this.form.urlStream,
                 urlSnapshot: this.form.urlSnapshot,
+                rotate: this.form.rotate,
                 flipX: this.form.flipX,
                 flipY: this.form.flipY,
             }
@@ -398,6 +408,7 @@ export default class SettingsWebcamsTab extends Mixins(BaseMixin) {
         this.form.targetFps = 15
         this.form.urlStream = '/webcam/?action=stream'
         this.form.urlSnapshot = '/webcam/?action=snapshot'
+        this.form.rotate = 0
         this.form.flipX = false
         this.form.flipY = false
     }
@@ -405,5 +416,46 @@ export default class SettingsWebcamsTab extends Mixins(BaseMixin) {
     setFormIcon(icon: string) {
         this.form.icon = icon
     }
+
+    openCrowsnestConf() {
+        this.$store.dispatch('editor/openFile', {
+            root: 'config',
+            path: '/',
+            filename: this.crowsnestConf?.filename,
+            size: this.crowsnestConf?.size,
+            permissions: this.crowsnestConf?.permissions,
+        })
+    }
 }
 </script>
+
+<style lang="scss" scoped>
+._transition i::before {
+    transition: transform 500ms;
+}
+._rotate-180:before {
+    transform: rotate(180deg);
+}
+
+.v-item-group {
+    button:hover::before,
+    button:focus::before {
+        opacity: 0 !important;
+    }
+    ._menu-button {
+        height: 40px;
+        width: 62px;
+        border: 1px solid rgba(255, 255, 255, 0.25) !important;
+    }
+    ._menu-button:hover {
+        border-color: rgba(255, 255, 255, 1) !important;
+    }
+    ._menu-button:focus {
+        border: 2px solid var(--color-primary) !important;
+    }
+}
+
+._webcam-settings-name-field ::v-deep .v-text-field__details {
+    margin-bottom: -12px !important;
+}
+</style>

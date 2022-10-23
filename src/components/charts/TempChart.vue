@@ -4,6 +4,7 @@
         v-observe-visibility="visibilityChanged"
         :option="chartOptions"
         :init-options="{ renderer: 'svg' }"
+        :autoresize="true"
         style="height: 250px; width: 100%"></e-chart>
 </template>
 
@@ -15,7 +16,7 @@ import BaseMixin from '../mixins/base'
 import { PrinterTempHistoryStateSerie, PrinterTempHistoryStateSourceEntry } from '@/store/printer/tempHistory/types'
 
 import type { ECharts } from 'echarts/core'
-import type { ECBasicOption } from 'echarts/types/dist/shared'
+import type { ECBasicOption } from 'echarts/types/dist/shared.d'
 import { mdiClock } from '@mdi/js'
 
 interface echartsTooltipObj {
@@ -26,8 +27,6 @@ interface echartsTooltipObj {
     components: {},
 })
 export default class TempChart extends Mixins(BaseMixin) {
-    convertName = convertName
-
     declare $refs: {
         tempchart: any
     }
@@ -47,7 +46,7 @@ export default class TempChart extends Mixins(BaseMixin) {
                 fontSize: '14px',
             },
             padding: 15,
-            formatter: this.tooltipFormater,
+            formatter: this.tooltipFormatter,
             confine: true,
             className: 'echarts-tooltip',
             position: function (pos: any, params: any, dom: any, rect: any, size: any) {
@@ -85,6 +84,7 @@ export default class TempChart extends Mixins(BaseMixin) {
             axisLabel: {
                 color: 'rgba(255, 255, 255, 0.24)',
                 margin: 10,
+                formatter: this.timeFormat,
             },
         },
         yAxis: [
@@ -195,7 +195,7 @@ export default class TempChart extends Mixins(BaseMixin) {
     }
 
     get chart(): ECharts | null {
-        return this.$refs.tempchart ?? null
+        return this.$refs.tempchart?.chart ?? null
     }
 
     get maxHistory() {
@@ -226,21 +226,18 @@ export default class TempChart extends Mixins(BaseMixin) {
         return this.$store.getters['printer/tempHistory/getSelectedLegends']
     }
 
+    get timeFormat() {
+        return this.hours12Format ? '{hh}:{mm}' : '{HH}:{mm}'
+    }
+
     mounted() {
         this.initChart()
-
-        window.addEventListener('resize', this.eventListenerResize)
+        this.chartOptions.xAxis.axisLabel.formatter = this.timeFormat
     }
 
     beforeDestroy() {
         if (typeof window === 'undefined') return
         if (this.chart) this.chart.dispose()
-
-        window.removeEventListener('resize', this.eventListenerResize)
-    }
-
-    eventListenerResize() {
-        this.chart?.resize()
     }
 
     initChart() {
@@ -297,21 +294,17 @@ export default class TempChart extends Mixins(BaseMixin) {
         }
     }
 
-    tooltipFormater(datasets: any) {
+    tooltipFormatter(datasets: any) {
         let output = ''
 
         const mainDatasets = datasets.filter((dataset: any) => {
             if (dataset.seriesName === 'date') return false
-            if (dataset.seriesName.includes('-')) {
-                if (dataset.seriesName.lastIndexOf('-') > -1) {
-                    const suffix = dataset.seriesName.slice(dataset.seriesName.lastIndexOf('-') + 1)
-                    return !['target', 'power'].includes(suffix)
-                }
 
-                return true
-            }
+            const lastIndex = dataset.seriesName.lastIndexOf('-')
+            if (lastIndex === -1) return true
 
-            return true
+            const suffix = dataset.seriesName.slice(lastIndex + 1)
+            return !['target', 'power', 'speed'].includes(suffix)
         })
         if (datasets.length) {
             let outputTime = datasets[0]['axisValueLabel']
@@ -395,6 +388,11 @@ export default class TempChart extends Mixins(BaseMixin) {
     @Watch('boolDisplayPwmAxis')
     boolDisplayPwmAxisChanged() {
         this.updateChartPwmAxis()
+    }
+
+    @Watch('hours12Format')
+    hours12FormatChanged() {
+        this.chartOptions.xAxis.axisLabel.formatter = this.timeFormat
     }
 }
 </script>

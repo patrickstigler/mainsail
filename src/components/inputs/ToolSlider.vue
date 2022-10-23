@@ -1,53 +1,3 @@
-<style scoped>
-._tool-slider-subheader {
-    height: auto;
-}
-
-._lock-button {
-    margin-left: -6px;
-}
-
-._error-msg {
-    color: #ff5252;
-    font-size: 12px;
-    padding: 4px 16px 2px 0;
-}
-
-.fade-enter-active {
-    animation: slide-in 0.15s reverse;
-    opacity: 1;
-}
-
-.fade-leave-active {
-    animation: slide-in 0.15s;
-    opacity: 1;
-}
-
-@keyframes slide-in {
-    100% {
-        transform: translateY(-5px);
-    }
-}
-
-._slider-input {
-    font-size: 0.875rem;
-    max-width: 5.4rem;
-    margin-left: 12px;
-}
-
-._slider-input >>> .v-input__slot {
-    min-height: 1rem !important;
-}
-
-._slider-input >>> .v-text-field__slot input {
-    padding: 4px 0 4px;
-}
-
-._slider-input >>> .v-input__append-inner {
-    margin: auto -5px auto 0 !important;
-}
-</style>
-
 <template>
     <v-row dense>
         <v-col class="pa-0">
@@ -67,25 +17,26 @@
                 </v-btn>
                 <v-spacer></v-spacer>
                 <span v-if="!hasInputField" class="font-weight-bold">{{ value }} {{ unit }}</span>
-                <v-text-field
-                    v-if="hasInputField"
-                    v-model="numInput"
-                    :error="errors().length > 0"
-                    :suffix="unit"
-                    type="number"
-                    hide-spin-buttons
-                    hide-details
-                    outlined
-                    dense
-                    class="_slider-input d-flex align-center pt-1"
-                    @blur="numInput = value"
-                    @focus="$event.target.select()"
-                    @keydown="checkInvalidChars"
-                    @keyup.enter="submitInput">
-                    <template v-if="value !== defaultValue || value !== numInput" #append>
-                        <v-icon small @click="resetSlider">{{ mdiRestart }}</v-icon>
-                    </template>
-                </v-text-field>
+                <form @submit.prevent="submitInput">
+                    <v-text-field
+                        v-if="hasInputField"
+                        v-model="numInput"
+                        :error="errors().length > 0"
+                        :suffix="unit"
+                        type="number"
+                        hide-spin-buttons
+                        hide-details
+                        outlined
+                        dense
+                        class="_slider-input d-flex align-center pt-1"
+                        @blur="numInput = value"
+                        @focus="$event.target.select()"
+                        @keydown="checkInvalidChars">
+                        <template v-if="value !== defaultValue || value !== numInput" #append>
+                            <v-icon small @click="resetSlider">{{ mdiRestart }}</v-icon>
+                        </template>
+                    </v-text-field>
+                </form>
             </v-subheader>
             <transition name="fade">
                 <!-- display errors-->
@@ -300,3 +251,54 @@ export default class ToolSlider extends Mixins(BaseMixin) {
     }
 }
 </script>
+
+<style scoped>
+._tool-slider-subheader {
+    height: auto;
+}
+
+._lock-button {
+    margin-left: -6px;
+}
+
+._error-msg {
+    color: #ff5252;
+    font-size: 12px;
+    padding: 4px 16px 2px 0;
+}
+
+.fade-enter-active {
+    animation: slide-in 0.15s reverse;
+    opacity: 1;
+}
+
+.fade-leave-active {
+    animation: slide-in 0.15s;
+    opacity: 1;
+}
+
+@keyframes slide-in {
+    100% {
+        transform: translateY(-5px);
+    }
+}
+
+._slider-input {
+    min-width: 4.2rem;
+    max-width: 5rem;
+    margin-left: 12px;
+}
+
+._slider-input >>> .v-input__slot {
+    min-height: 1rem !important;
+}
+
+._slider-input >>> .v-text-field__slot input {
+    padding-top: 4px;
+    padding-bottom: 4px;
+}
+
+._slider-input >>> .v-input__append-inner {
+    margin: auto -5px auto 0 !important;
+}
+</style>

@@ -1,7 +1,6 @@
 import { GetterTree } from 'vuex'
 import { GuiState } from '@/store/gui/types'
 import { GuiMacrosStateMacrogroup } from '@/store/gui/macros/types'
-import Vue from 'vue'
 
 // eslint-disable-next-line
 export const getters: GetterTree<GuiState, any> = {
@@ -47,7 +46,7 @@ export const getters: GetterTree<GuiState, any> = {
                 panels = panels.filter((element: any) => {
                     if (!element.name.startsWith('macrogroup_')) return true
 
-                    const macrogroupId = element.name.substr(11)
+                    const macrogroupId = element.name.slice(11)
                     return (
                         macrogroups.findIndex(
                             (macrogroup: GuiMacrosStateMacrogroup) => macrogroup.id === macrogroupId
@@ -69,5 +68,18 @@ export const getters: GetterTree<GuiState, any> = {
         else if (rootGetters['printer/existsZtilt']) return 'ztilt'
 
         return 'm84'
+    },
+
+    getHours12Format: (state) => {
+        const setting = state.general.timeFormat
+        if (setting === '12hours') return true
+        if (setting === null) {
+            const browserLocale =
+                navigator.languages && navigator.languages.length ? navigator.languages[0] : navigator.language
+
+            if (browserLocale === 'en_us') return true
+        }
+
+        return false
     },
 }

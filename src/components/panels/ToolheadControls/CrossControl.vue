@@ -376,8 +376,6 @@ export default class CrossControl extends Mixins(BaseMixin, ControlMixin) {
     mdiEngineOff = mdiEngineOff
     mdiHome = mdiHome
 
-    private stepSize = this.stepsReversed[this.selectedCrossStep]
-
     get actionButton(): string {
         return this.$store.state.gui.control.actionButton ?? this.defaultActionButton
     }
@@ -391,6 +389,10 @@ export default class CrossControl extends Mixins(BaseMixin, ControlMixin) {
 
     set selectedCrossStep(newVal) {
         this.$store.dispatch('gui/saveSetting', { name: 'control.selectedCrossStep', value: newVal })
+    }
+
+    get stepSize(): number {
+        return this.stepsReversed[this.selectedCrossStep]
     }
 
     /**
@@ -414,21 +416,6 @@ export default class CrossControl extends Mixins(BaseMixin, ControlMixin) {
 
     get stepsReversed() {
         return Array.from(new Set([...(this.stepsAll ?? [])])).sort((a, b) => a - b)
-    }
-
-    /**
-     * Axes home states
-     */
-    get xAxisHomed(): boolean {
-        return this.$store.state.printer.toolhead?.homed_axes.includes('x') ?? false
-    }
-
-    get yAxisHomed(): boolean {
-        return this.$store.state.printer.toolhead?.homed_axes.includes('y') ?? false
-    }
-
-    get zAxisHomed(): boolean {
-        return this.$store.state.printer.toolhead?.homed_axes.includes('z') ?? false
     }
 }
 </script>

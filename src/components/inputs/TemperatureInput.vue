@@ -1,40 +1,18 @@
-<style scoped>
-._temp-input {
-    font-size: 0.875rem;
-    min-width: 4rem;
-    max-width: 5rem;
-}
-
-._temp-input >>> .v-input__slot {
-    min-height: 1rem !important;
-    padding-left: 8px !important;
-    padding-right: 8px !important;
-}
-
-._temp-input >>> .v-text-field__slot input {
-    padding: 4px 0 4px;
-}
-
-._preset {
-    font-size: 0.8125rem;
-    font-weight: 500;
-}
-</style>
-
 <template>
     <div class="d-flex align-center">
-        <v-text-field
-            v-model="value"
-            suffix="°C"
-            type="number"
-            dense
-            outlined
-            hide-details
-            hide-spin-buttons
-            class="_temp-input pr-1"
-            @blur="value = target"
-            @focus="$event.target.select()"
-            @keyup.enter="setTemps"></v-text-field>
+        <form @submit.prevent="setTemps">
+            <v-text-field
+                v-model="value"
+                suffix="°C"
+                type="number"
+                dense
+                outlined
+                hide-details
+                hide-spin-buttons
+                class="_temp-input pr-1"
+                @blur="value = target"
+                @focus="$event.target.select()"></v-text-field>
+        </form>
         <v-menu v-if="presets" :offset-y="true" left title="Preheat">
             <template #activator="{ on, attrs }">
                 <v-btn
@@ -56,11 +34,11 @@
                     link
                     style="min-height: 32px"
                     @click="doSend(`${command} ${attributeName}=${name} TARGET=${preset.value}`)">
-                    <div class="d-flex align-center _preset">
-                        <v-icon v-if="preset.value === 0" else color="primary" small class="mr-1">
+                    <div class="_preset">
+                        <v-icon v-if="preset.value === 0" else color="primary" small class="_preset-icon">
                             {{ mdiSnowflake }}
                         </v-icon>
-                        <v-icon v-else small class="mr-1">{{ mdiFire }}</v-icon>
+                        <v-icon v-else small class="_preset-icon">{{ mdiFire }}</v-icon>
                         <span style="padding-top: 2px">{{ preset.value }}°C</span>
                     </div>
                 </v-list-item>
@@ -123,3 +101,30 @@ export default class TemperatureInput extends Mixins(BaseMixin, ControlMixin) {
     }
 }
 </script>
+
+<style scoped>
+._temp-input {
+    min-width: 4.2rem;
+    max-width: 5rem;
+}
+
+._temp-input >>> .v-input__slot {
+    min-height: 1rem !important;
+    padding-left: 8px !important;
+    padding-right: 8px !important;
+}
+
+._temp-input >>> .v-text-field__slot input {
+    padding-top: 4px;
+    padding-bottom: 4px;
+}
+
+._preset {
+    font-size: 0.875rem;
+}
+
+._preset-icon {
+    margin-top: -1px;
+    margin-right: 4px;
+}
+</style>

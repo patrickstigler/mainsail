@@ -272,7 +272,9 @@
                             <v-divider class="my-3"></v-divider>
                             <v-row>
                                 <v-col>{{ $t('History.LastModified') }}</v-col>
-                                <v-col class="text-right">{{ formatDate(detailsDialog.item.metadata.modified) }}</v-col>
+                                <v-col class="text-right">
+                                    {{ formatDateTime(detailsDialog.item.metadata.modified) }}
+                                </v-col>
                             </v-row>
                         </template>
                         <v-divider class="my-3"></v-divider>
@@ -289,13 +291,13 @@
                         <v-divider class="my-3"></v-divider>
                         <v-row>
                             <v-col>{{ $t('History.StartTime') }}</v-col>
-                            <v-col class="text-right">{{ formatDate(detailsDialog.item.start_time) }}</v-col>
+                            <v-col class="text-right">{{ formatDateTime(detailsDialog.item.start_time) }}</v-col>
                         </v-row>
                         <template v-if="'end_time' in detailsDialog.item && detailsDialog.item.end_time > 0">
                             <v-divider class="my-3"></v-divider>
                             <v-row>
                                 <v-col>{{ $t('History.EndTime') }}</v-col>
-                                <v-col class="text-right">{{ formatDate(detailsDialog.item.end_time) }}</v-col>
+                                <v-col class="text-right">{{ formatDateTime(detailsDialog.item.end_time) }}</v-col>
                             </v-row>
                         </template>
                         <template
@@ -761,12 +763,6 @@ export default class HistoryListPanel extends Mixins(BaseMixin) {
         this.$socket.emit('server.history.list', { start: 0, limit: 50 }, { action: 'server/history/getHistory' })
     }
 
-    formatDate(date: number) {
-        const tmp2 = new Date(date * 1000)
-
-        return tmp2.toLocaleString().replace(',', '')
-    }
-
     formatPrintTime(totalSeconds: number) {
         if (totalSeconds) {
             let output = ''
@@ -948,14 +944,24 @@ export default class HistoryListPanel extends Mixins(BaseMixin) {
 
         row.push('filename')
         row.push('status')
+
         this.tableFields.forEach((col) => {
             row.push(col.value)
         })
 
+        if (this.headers.find((header) => header.value === 'slicer')?.visible) {
+            row.push('slicer')
+        }
+
         content.push(row)
 
-        if (this.jobs.length) {
-            this.jobs.forEach((job: ServerHistoryStateJob) => {
+        let jobs = [...this.jobs]
+        if (this.selectedJobs.length) {
+            jobs = [...this.selectedJobs]
+        }
+
+        if (jobs.length) {
+            jobs.forEach((job: ServerHistoryStateJob) => {
                 const row: string[] = []
 
                 let filename = job.filename
@@ -1003,15 +1009,15 @@ export default class HistoryListPanel extends Mixins(BaseMixin) {
         if (!format) {
             switch (col.outputType) {
                 case 'date':
-                    return this.formatDate(value)
+                    return this.formatDateTime(value * 1000)
 
                 case 'time':
-                    return value.toFixed()
+                    return value?.toFixed() ?? ''
 
                 default:
                     switch (typeof value) {
                         case 'number':
-                            return value.toLocaleString()
+                            return value?.toLocaleString(undefined, { useGrouping: false }) ?? 0
 
                         case 'string':
                             if (escapeChar !== null && value.includes(escapeChar)) value = '"' + value + '"'
@@ -1028,18 +1034,18 @@ export default class HistoryListPanel extends Mixins(BaseMixin) {
                     return formatFilesize(value)
 
                 case 'date':
-                    return this.formatDate(value)
+                    return this.formatDateTime(value * 1000)
 
                 case 'time':
                     return this.formatPrintTime(value)
 
                 case 'temp':
-                    return value.toFixed() + ' °C'
+                    return value?.toFixed() + ' °C'
 
                 case 'length':
                     if (value > 1000) return (value / 1000).toFixed(2) + ' m'
 
-                    return value.toFixed(2) + ' mm'
+                    return value?.toFixed(2) + ' mm'
 
                 default:
                     return value

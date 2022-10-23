@@ -1,72 +1,9 @@
-<style>
-.files-table .v-data-table-header__icon {
-    margin-left: 7px;
-}
-
-.files-table .file-list-cursor:hover {
-    cursor: pointer;
-}
-
-.fileupload-card {
-    position: relative;
-}
-
-.file-list--select-td {
-    width: 20px;
-}
-
-.files-table th.text-start {
-    padding-right: 0 !important;
-}
-
-.file-list__dragzone {
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    height: 100%;
-    z-index: 9999999999;
-    background-color: rgba(0, 0, 0, 0.5);
-    transition: visibility 175ms, opacity 175ms;
-    font: bold 42px Oswald, DejaVu Sans, Tahoma, sans-serif;
-}
-
-.file-list__dragzone:before {
-    display: block;
-    content: ' ';
-    position: absolute;
-    top: 15px;
-    right: 15px;
-    bottom: 15px;
-    left: 15px;
-    border: 3px dashed white;
-    border-radius: 15px;
-}
-
-.file-list__dragzone .textnode {
-    text-align: center;
-    transition: font-size 175ms;
-}
-
-.v-chip.minimum-chip {
-    padding: 0;
-    min-width: 24px;
-}
-
-.v-chip.minimum-chip .v-chip__content {
-    margin: 0 auto;
-}
-
-.file-list__count_printed {
-    position: relative;
-    top: 1px;
-}
-</style>
-
 <template>
-    <div @dragover="dragOverUpload" @dragleave="dragLeaveUpload" @drop.prevent.stop="dragDropUpload">
-        <panel :title="$t('Files.GCodeFiles')" :icon="mdiFileDocumentMultipleOutline" card-class="gcode-files-panel">
+    <div>
+        <panel
+            :title="$t('Files.GCodeFiles').toString()"
+            :icon="mdiFileDocumentMultipleOutline"
+            card-class="gcode-files-panel">
             <v-card-text>
                 <v-row>
                     <v-col class="col-12 d-flex align-center">
@@ -160,19 +97,18 @@
                                 </v-list-item>
                                 <v-divider></v-divider>
                                 <draggable
-                                    v-model="configableHeaders"
+                                    v-model="configurableHeaders"
                                     handle=".handle"
                                     class="v-list-item-group"
                                     ghost-class="ghost"
                                     group="gcodeFilesColumnOrder">
                                     <v-list-item
-                                        v-for="header of configableHeaders"
+                                        v-for="header of configurableHeaders"
                                         :key="header.value"
-                                        class="minHeight36"
-                                        link>
+                                        class="minHeight36">
                                         <v-row>
                                             <v-col class="col-auto pr-0">
-                                                <v-icon class="handle">{{ mdiArrowUpDown }}</v-icon>
+                                                <v-icon class="handle">{{ mdiDragVertical }}</v-icon>
                                             </v-col>
                                             <v-col>
                                                 {{ header.text }}
@@ -294,70 +230,54 @@
                             <template v-if="item.isDirectory">
                                 <v-icon>{{ mdiFolder }}</v-icon>
                             </template>
-                            <template v-else>
-                                <template v-if="item.small_thumbnail && item.big_thumbnail">
-                                    <v-tooltip
-                                        v-if="!item.isDirectory && item.small_thumbnail && item.big_thumbnail"
-                                        top
-                                        content-class="tooltip__content-opacity1">
-                                        <template #activator="{ on, attrs }">
-                                            <vue-load-image>
-                                                <img
-                                                    slot="image"
-                                                    :src="item.small_thumbnail"
-                                                    width="32"
-                                                    height="32"
-                                                    :alt="item.filename"
-                                                    v-bind="attrs"
-                                                    v-on="on" />
+                            <template v-else-if="item.small_thumbnail">
+                                <v-tooltip
+                                    top
+                                    content-class="tooltip__content-opacity1"
+                                    :disabled="!item.big_thumbnail">
+                                    <template #activator="{ on, attrs }">
+                                        <vue-load-image>
+                                            <img
+                                                slot="image"
+                                                :src="item.small_thumbnail"
+                                                width="32"
+                                                height="32"
+                                                :alt="item.filename"
+                                                v-bind="attrs"
+                                                v-on="on" />
+                                            <div slot="preloader">
                                                 <v-progress-circular
-                                                    slot="preloader"
                                                     indeterminate
                                                     color="primary"></v-progress-circular>
-                                                <v-icon slot="error">{{ mdiFile }}</v-icon>
-                                            </vue-load-image>
-                                        </template>
-                                        <span><img :src="item.big_thumbnail" width="250" :alt="item.filename" /></span>
-                                    </v-tooltip>
-                                </template>
-                                <template v-else-if="item.small_thumbnail">
-                                    <vue-load-image>
-                                        <img
-                                            slot="image"
-                                            :src="item.small_thumbnail"
-                                            width="32"
-                                            height="32"
-                                            :alt="item.filename" />
-                                        <v-progress-circular
-                                            slot="preloader"
-                                            indeterminate
-                                            color="primary"></v-progress-circular>
-                                        <v-icon slot="error">{{ mdiFile }}</v-icon>
-                                    </vue-load-image>
-                                </template>
-                                <template v-else>
-                                    <v-icon>{{ mdiFile }}</v-icon>
-                                </template>
+                                            </div>
+                                            <div slot="error">
+                                                <v-icon>{{ mdiFile }}</v-icon>
+                                            </div>
+                                        </vue-load-image>
+                                    </template>
+                                    <span><img :src="item.big_thumbnail" width="250" :alt="item.filename" /></span>
+                                </v-tooltip>
+                            </template>
+                            <template v-else>
+                                <v-icon>{{ mdiFile }}</v-icon>
                             </template>
                         </td>
                         <td class=" ">{{ item.filename }}</td>
                         <td class="text-right text-no-wrap">
-                            <v-tooltip v-if="getJobStatus(item)" top>
+                            <v-tooltip v-if="item.last_status" top>
                                 <template #activator="{ on, attrs }">
                                     <span v-bind="attrs" v-on="on">
                                         <span
-                                            v-if="item.count_printed > 1"
-                                            :class="`file-list__count_printed ${getStatusTextColor(
-                                                getJobStatus(item)
-                                            )}`">
+                                            v-if="item.count_printed > 0"
+                                            :class="`file-list__count_printed ${getStatusTextColor(item.last_status)}`">
                                             {{ item.count_printed }}
                                         </span>
-                                        <v-icon small :color="getStatusColor(getJobStatus(item))">
-                                            {{ getStatusIcon(getJobStatus(item)) }}
+                                        <v-icon small :color="getStatusColor(item.last_status)">
+                                            {{ getStatusIcon(item.last_status) }}
                                         </v-icon>
                                     </span>
                                 </template>
-                                <span>{{ getJobStatus(item).replace(/_/g, ' ') }}</span>
+                                <span>{{ item.last_status.replace(/_/g, ' ') }}</span>
                             </v-tooltip>
                         </td>
                         <td
@@ -373,59 +293,12 @@
                     </tr>
                 </template>
             </v-data-table>
-            <div
-                class="file-list__dragzone d-flex justify-center flex-column"
-                :style="'visibility: ' + dropzone.visibility + '; opacity: ' + dropzone.hidden">
-                <div class="textnode">{{ $t('Files.DropFilesToAddGcode') }}</div>
-            </div>
         </panel>
-        <v-snackbar v-model="uploadSnackbar.status" :timeout="-1" :value="true" fixed right bottom dark>
-            <span v-if="uploadSnackbar.max > 1" class="mr-1">
-                ({{ uploadSnackbar.number }}/{{ uploadSnackbar.max }})
-            </span>
-            <strong>{{ $t('Files.Uploading') + ' ' + uploadSnackbar.filename }}</strong>
-            <br />
-            {{ Math.round(uploadSnackbar.percent) }} % @ {{ formatFilesize(Math.round(uploadSnackbar.speed)) }}/s
-            <br />
-            <v-progress-linear class="mt-2" :value="uploadSnackbar.percent"></v-progress-linear>
-            <template #action="{ attrs }">
-                <v-btn color="red" text v-bind="attrs" style="min-width: auto" @click="cancelUpload">
-                    <v-icon class="0">{{ mdiClose }}</v-icon>
-                </v-btn>
-            </template>
-        </v-snackbar>
-        <v-dialog v-model="dialogPrintFile.show" :max-width="dialogPrintFile.item.big_thumbnail_width">
-            <v-card>
-                <v-img
-                    v-if="dialogPrintFile.item.big_thumbnail"
-                    contain
-                    :src="dialogPrintFile.item.big_thumbnail"></v-img>
-                <v-card-title class="headline">{{ $t('Files.StartJob') }}</v-card-title>
-                <v-card-text class="pb-0">
-                    {{ $t('Files.DoYouWantToStartFilename', { filename: dialogPrintFile.item.filename }) }}
-                </v-card-text>
-                <template v-if="moonrakerComponents.includes('timelapse')">
-                    <v-divider class="mt-3 mb-2"></v-divider>
-                    <v-card-text class="pb-0">
-                        <settings-row title="Timelapse">
-                            <v-switch v-model="timelapseEnabled" hide-details class="mt-0"></v-switch>
-                        </settings-row>
-                    </v-card-text>
-                    <v-divider class="mt-2 mb-0"></v-divider>
-                </template>
-                <v-card-actions>
-                    <v-spacer></v-spacer>
-                    <v-btn color="" text @click="dialogPrintFile.show = false">{{ $t('Files.Cancel') }}</v-btn>
-                    <v-btn
-                        color="primary"
-                        text
-                        :disabled="printerIsPrinting || !klipperReadyForGui"
-                        @click="startPrint(dialogPrintFile.item.filename)">
-                        {{ $t('Files.StartPrint') }}
-                    </v-btn>
-                </v-card-actions>
-            </v-card>
-        </v-dialog>
+        <start-print-dialog
+            :bool="dialogPrintFile.show"
+            :file="dialogPrintFile.item"
+            :current-path="currentPath"
+            @closeDialog="closeStartPrint"></start-print-dialog>
         <v-menu v-model="contextMenu.shown" :position-x="contextMenu.x" :position-y="contextMenu.y" absolute offset-y>
             <v-list>
                 <v-list-item
@@ -443,14 +316,9 @@
                     {{ $t('Files.AddToQueue') }}
                 </v-list-item>
                 <v-list-item
-                    v-if="
-                        'first_layer_extr_temp' in contextMenu.item &&
-                        contextMenu.item.first_layer_extr_temp > 0 &&
-                        'first_layer_bed_temp' in contextMenu.item &&
-                        contextMenu.item.first_layer_bed_temp > 0
-                    "
+                    v-if="contextMenu.item.preheat_gcode !== null"
                     :disabled="['error', 'printing', 'paused'].includes(printer_state)"
-                    @click="preheat">
+                    @click="doSend(contextMenu.item.preheat_gcode)">
                     <v-icon class="mr-1">{{ mdiFire }}</v-icon>
                     {{ $t('Files.Preheat') }}
                 </v-list-item>
@@ -470,7 +338,7 @@
                     {{ $t('Files.Rename') }}
                 </v-list-item>
                 <v-list-item v-if="!contextMenu.item.isDirectory" @click="editFile(contextMenu.item)">
-                    <v-icon class="mr-1">{{ mdiPencil }}</v-icon>
+                    <v-icon class="mr-1">{{ mdiFileDocumentEditOutline }}</v-icon>
                     {{ $t('Files.EditFile') }}
                 </v-list-item>
                 <v-list-item v-if="!contextMenu.item.isDirectory" @click="renameFile(contextMenu.item)">
@@ -492,7 +360,7 @@
         </v-menu>
         <v-dialog v-model="dialogCreateDirectory.show" :max-width="400">
             <panel
-                :title="$t('Files.NewDirectory')"
+                :title="$t('Files.NewDirectory').toString()"
                 card-class="gcode-files-new-directory-dialog"
                 :margin-bottom="false">
                 <template #buttons>
@@ -505,19 +373,25 @@
                         ref="inputFieldCreateDirectory"
                         v-model="dialogCreateDirectory.name"
                         :label="$t('Files.Name')"
-                        :rules="input_rules"
                         required
+                        :rules="nameInputRules"
+                        @update:error="isInvalidName = !isInvalidName"
                         @keypress.enter="createDirectoryAction"></v-text-field>
                 </v-card-text>
                 <v-card-actions>
                     <v-spacer></v-spacer>
                     <v-btn color="" text @click="dialogCreateDirectory.show = false">{{ $t('Files.Cancel') }}</v-btn>
-                    <v-btn color="primary" text @click="createDirectoryAction">{{ $t('Files.Create') }}</v-btn>
+                    <v-btn :disabled="isInvalidName" color="primary" text @click="createDirectoryAction">
+                        {{ $t('Files.Create') }}
+                    </v-btn>
                 </v-card-actions>
             </panel>
         </v-dialog>
         <v-dialog v-model="dialogRenameFile.show" :max-width="400">
-            <panel :title="$t('Files.RenameFile')" card-class="gcode-files-rename-file-dialog" :margin-bottom="false">
+            <panel
+                :title="$t('Files.RenameFile').toString()"
+                card-class="gcode-files-rename-file-dialog"
+                :margin-bottom="false">
                 <template #buttons>
                     <v-btn icon tile @click="dialogRenameFile.show = false">
                         <v-icon>{{ mdiCloseThick }}</v-icon>
@@ -527,20 +401,24 @@
                     <v-text-field
                         ref="inputFieldRenameFile"
                         v-model="dialogRenameFile.newName"
-                        :label="$t('Files.Name')"
+                        :label="$t('Files.Name').toString()"
                         required
+                        :rules="nameInputRules"
+                        @update:error="isInvalidName = !isInvalidName"
                         @keyup.enter="renameFileAction"></v-text-field>
                 </v-card-text>
                 <v-card-actions>
                     <v-spacer></v-spacer>
                     <v-btn color="" text @click="dialogRenameFile.show = false">{{ $t('Files.Cancel') }}</v-btn>
-                    <v-btn color="primary" text @click="renameFileAction">{{ $t('Files.Rename') }}</v-btn>
+                    <v-btn :disabled="isInvalidName" color="primary" text @click="renameFileAction">
+                        {{ $t('Files.Rename') }}
+                    </v-btn>
                 </v-card-actions>
             </panel>
         </v-dialog>
         <v-dialog v-model="dialogRenameDirectory.show" max-width="400">
             <panel
-                :title="$t('Files.RenameDirectory')"
+                :title="$t('Files.RenameDirectory').toString()"
                 card-class="gcode-files-rename-directory-dialog"
                 :margin-bottom="false">
                 <template #buttons>
@@ -554,18 +432,22 @@
                         v-model="dialogRenameDirectory.newName"
                         :label="$t('Files.Name')"
                         required
+                        :rules="nameInputRules"
+                        @update:error="isInvalidName = !isInvalidName"
                         @keyup.enter="renameDirectoryAction"></v-text-field>
                 </v-card-text>
                 <v-card-actions>
                     <v-spacer></v-spacer>
                     <v-btn color="" text @click="dialogRenameDirectory.show = false">{{ $t('Files.Cancel') }}</v-btn>
-                    <v-btn color="primary" text @click="renameDirectoryAction">{{ $t('Files.Rename') }}</v-btn>
+                    <v-btn :disabled="isInvalidName" color="primary" text @click="renameDirectoryAction">
+                        {{ $t('Files.Rename') }}
+                    </v-btn>
                 </v-card-actions>
             </panel>
         </v-dialog>
         <v-dialog v-model="dialogDeleteDirectory.show" max-width="400">
             <panel
-                :title="$t('Files.DeleteDirectory')"
+                :title="$t('Files.DeleteDirectory').toString()"
                 card-class="gcode-files-delete-directory-dialog"
                 :margin-bottom="false">
                 <template #buttons>
@@ -586,7 +468,10 @@
             </panel>
         </v-dialog>
         <v-dialog v-model="deleteSelectedDialog" max-width="400">
-            <panel :title="$t('Files.Delete')" card-class="gcode-files-delete-selected-dialog" :margin-bottom="false">
+            <panel
+                :title="$t('Files.Delete').toString()"
+                card-class="gcode-files-delete-selected-dialog"
+                :margin-bottom="false">
                 <template #buttons>
                     <v-btn icon tile @click="deleteSelectedDialog = false">
                         <v-icon>{{ mdiCloseThick }}</v-icon>
@@ -608,56 +493,49 @@
 <script lang="ts">
 import { Component, Mixins, Watch } from 'vue-property-decorator'
 import BaseMixin from '@/components/mixins/base'
-import axios from 'axios'
 import { validGcodeExtensions } from '@/store/variables'
-import { formatFilesize, formatDate, sortFiles, formatPrintTime } from '@/plugins/helpers'
+import { formatFilesize, formatPrintTime, sortFiles } from '@/plugins/helpers'
 import { FileStateFile, FileStateGcodefile } from '@/store/files/types'
 import Panel from '@/components/ui/Panel.vue'
 import SettingsRow from '@/components/settings/SettingsRow.vue'
 import draggable from 'vuedraggable'
 import {
-    mdiFileDocumentMultipleOutline,
-    mdiFile,
-    mdiMagnify,
-    mdiUpload,
-    mdiFolderPlus,
-    mdiRefresh,
-    mdiCog,
-    mdiFolderUpload,
-    mdiFolder,
-    mdiPlay,
-    mdiPlaylistPlus,
-    mdiFire,
-    mdiVideo3d,
-    mdiCloudDownload,
-    mdiRenameBox,
-    mdiPencil,
-    mdiDelete,
-    mdiCloseThick,
-    mdiClose,
+    mdiDragVertical,
     mdiCheckboxBlankOutline,
     mdiCheckboxMarked,
-    mdiArrowUpDown,
+    mdiCloseThick,
+    mdiCloudDownload,
+    mdiCog,
+    mdiDelete,
+    mdiFile,
+    mdiFileDocumentMultipleOutline,
+    mdiFire,
+    mdiFolder,
+    mdiFolderPlus,
+    mdiFolderUpload,
+    mdiMagnify,
+    mdiPlay,
+    mdiPlaylistPlus,
+    mdiRefresh,
+    mdiRenameBox,
+    mdiUpload,
+    mdiVideo3d,
+    mdiFileDocumentEditOutline,
 } from '@mdi/js'
+import StartPrintDialog from '@/components/dialogs/StartPrintDialog.vue'
+import ControlMixin from '@/components/mixins/control'
 
-interface draggingFile {
-    status: boolean
+interface contextMenu {
+    shown: boolean
+    isDirectory: boolean
+    touchTimer?: number | null
+    x: number
+    y: number
     item: FileStateGcodefile
 }
 
-interface uploadSnackbar {
-    status: boolean
-    filename: string
-    percent: number
-    speed: number
-    total: number
-    number: number
-    max: number
-    cancelTokenSource: any
-    lastProgress: {
-        time: number
-        loaded: number
-    }
+interface draggingFile {
+    item: FileStateGcodefile
 }
 
 interface dialogPrintFile {
@@ -678,15 +556,15 @@ interface tableColumnSetting {
     sortable?: boolean
     class?: string
     pos?: number
-    outputType?: 'string' | 'date' | 'length' | 'weight' | 'filesize' | 'time'
+    outputType?: 'string' | 'date' | 'length' | 'weight' | 'filesize' | 'temp' | 'time'
 }
 
 @Component({
-    components: { Panel, SettingsRow, draggable },
+    components: { StartPrintDialog, Panel, SettingsRow, draggable },
 })
-export default class GcodefilesPanel extends Mixins(BaseMixin) {
-    mdiFileDocumentMultipleOutline = mdiFileDocumentMultipleOutline
+export default class GcodefilesPanel extends Mixins(BaseMixin, ControlMixin) {
     mdiFile = mdiFile
+    mdiFileDocumentMultipleOutline = mdiFileDocumentMultipleOutline
     mdiMagnify = mdiMagnify
     mdiUpload = mdiUpload
     mdiFolderPlus = mdiFolderPlus
@@ -697,19 +575,17 @@ export default class GcodefilesPanel extends Mixins(BaseMixin) {
     mdiPlay = mdiPlay
     mdiPlaylistPlus = mdiPlaylistPlus
     mdiFire = mdiFire
-    mdiClose = mdiClose
     mdiVideo3d = mdiVideo3d
     mdiCloudDownload = mdiCloudDownload
     mdiRenameBox = mdiRenameBox
-    mdiPencil = mdiPencil
+    mdiFileDocumentEditOutline = mdiFileDocumentEditOutline
     mdiDelete = mdiDelete
     mdiCloseThick = mdiCloseThick
     mdiCheckboxBlankOutline = mdiCheckboxBlankOutline
     mdiCheckboxMarked = mdiCheckboxMarked
-    mdiArrowUpDown = mdiArrowUpDown
+    mdiDragVertical = mdiDragVertical
 
     validGcodeExtensions = validGcodeExtensions
-    formatDate = formatDate
     formatFilesize = formatFilesize
     formatPrintTime = formatPrintTime
     sortFiles = sortFiles
@@ -721,62 +597,14 @@ export default class GcodefilesPanel extends Mixins(BaseMixin) {
         inputFieldRenameDirectory: HTMLInputElement
     }
 
-    private TimelapseModeOptions = [
-        {
-            text: 'layermacro',
-            value: 'layermacro',
-        },
-        {
-            text: 'hyperlapse',
-            value: 'hyperlapse',
-        },
-    ]
-
     private search = ''
-    private selected = []
-    private hideHeaderColums = []
-    private dropzone = {
-        visibility: 'hidden',
-        opacity: 0,
-    }
-    private draggingFile: draggingFile = {
-        status: false,
-        item: {
-            isDirectory: false,
-            filename: '',
-            permissions: '',
-            modified: new Date(),
-            small_thumbnail: null,
-            big_thumbnail: null,
-            big_thumbnail_width: null,
-            count_printed: 0,
-            last_filament_used: null,
-            last_start_time: null,
-            last_end_time: null,
-            last_print_duration: null,
-            last_status: null,
-            last_total_duration: null,
-        },
-    }
-    private uploadSnackbar: uploadSnackbar = {
-        status: false,
-        filename: '',
-        percent: 0,
-        speed: 0,
-        total: 0,
-        number: 0,
-        max: 0,
-        cancelTokenSource: {},
-        lastProgress: {
-            time: 0,
-            loaded: 0,
-        },
-    }
+
     private dialogCreateDirectory = {
         show: false,
         name: '',
     }
-    private contextMenu = {
+
+    private contextMenu: contextMenu = {
         shown: false,
         isDirectory: false,
         touchTimer: undefined,
@@ -787,16 +615,7 @@ export default class GcodefilesPanel extends Mixins(BaseMixin) {
             filename: '',
             permissions: '',
             modified: new Date(),
-        },
-    }
-
-    private dialogPrintFile: dialogPrintFile = {
-        show: false,
-        item: {
-            isDirectory: false,
-            filename: '',
-            permissions: '',
-            modified: new Date(),
+            preheat_gcode: null,
             small_thumbnail: null,
             big_thumbnail: null,
             big_thumbnail_width: null,
@@ -808,74 +627,46 @@ export default class GcodefilesPanel extends Mixins(BaseMixin) {
             last_status: null,
             last_total_duration: null,
         },
+    }
+
+    private draggingFile: draggingFile = {
+        item: { ...this.contextMenu.item },
+    }
+
+    private dialogPrintFile: dialogPrintFile = {
+        show: false,
+        item: { ...this.contextMenu.item },
     }
 
     private dialogRenameFile: dialogRenameObject = {
         show: false,
         newName: '',
-        item: {
-            isDirectory: false,
-            filename: '',
-            permissions: '',
-            modified: new Date(),
-            small_thumbnail: null,
-            big_thumbnail: null,
-            big_thumbnail_width: null,
-            count_printed: 0,
-            last_filament_used: null,
-            last_start_time: null,
-            last_end_time: null,
-            last_print_duration: null,
-            last_status: null,
-            last_total_duration: null,
-        },
+        item: { ...this.contextMenu.item },
     }
 
     private dialogRenameDirectory: dialogRenameObject = {
         show: false,
         newName: '',
-        item: {
-            isDirectory: false,
-            filename: '',
-            permissions: '',
-            modified: new Date(),
-            small_thumbnail: null,
-            big_thumbnail: null,
-            big_thumbnail_width: null,
-            count_printed: 0,
-            last_filament_used: null,
-            last_start_time: null,
-            last_end_time: null,
-            last_print_duration: null,
-            last_status: null,
-            last_total_duration: null,
-        },
+        item: { ...this.contextMenu.item },
     }
 
     private dialogDeleteDirectory: dialogRenameObject = {
         show: false,
         newName: '',
-        item: {
-            isDirectory: false,
-            filename: '',
-            permissions: '',
-            modified: new Date(),
-            small_thumbnail: null,
-            big_thumbnail: null,
-            big_thumbnail_width: null,
-            count_printed: 0,
-            last_filament_used: null,
-            last_start_time: null,
-            last_end_time: null,
-            last_print_duration: null,
-            last_status: null,
-            last_total_duration: null,
-        },
+        item: { ...this.contextMenu.item },
     }
 
     private deleteSelectedDialog = false
 
-    private input_rules = [(value: string) => value.indexOf(' ') === -1 || 'Name contains spaces!']
+    private isInvalidName = true
+    private nameInputRules = [
+        (value: string) => !!value || this.$t('Files.InvalidNameEmpty'),
+        (value: string) => !this.existsFilename(value) || this.$t('Files.InvalidNameAlreadyExists'),
+    ]
+
+    existsFilename(name: string) {
+        return this.files.findIndex((file) => file.filename === name) >= 0
+    }
 
     get currentPath() {
         const path = this.$store.state.gui.view.gcodefiles.currentPath
@@ -909,7 +700,7 @@ export default class GcodefilesPanel extends Mixins(BaseMixin) {
         ]
     }
 
-    get configableHeaders() {
+    get configurableHeaders() {
         const headers: tableColumnSetting[] = [
             {
                 text: this.$t('Files.Filesize').toString(),
@@ -947,6 +738,27 @@ export default class GcodefilesPanel extends Mixins(BaseMixin) {
                 outputType: 'length',
             },
             {
+                text: this.$t('Files.ExtruderTemp').toString(),
+                value: 'first_layer_extr_temp',
+                visible: true,
+                class: 'text-no-wrap',
+                outputType: 'temp',
+            },
+            {
+                text: this.$t('Files.BedTemp').toString(),
+                value: 'first_layer_bed_temp',
+                visible: true,
+                class: 'text-no-wrap',
+                outputType: 'temp',
+            },
+            {
+                text: this.$t('Files.ChamberTemp').toString(),
+                value: 'chamber_temp',
+                visible: true,
+                class: 'text-no-wrap',
+                outputType: 'temp',
+            },
+            {
                 text: this.$t('Files.FilamentName').toString(),
                 value: 'filament_name',
                 visible: true,
@@ -981,11 +793,39 @@ export default class GcodefilesPanel extends Mixins(BaseMixin) {
                 outputType: 'time',
             },
             {
+                text: this.$t('Files.LastStartTime').toString(),
+                value: 'last_start_time',
+                visible: true,
+                class: 'text-no-wrap',
+                outputType: 'date',
+            },
+            {
+                text: this.$t('Files.LastEndTime').toString(),
+                value: 'last_end_time',
+                visible: true,
+                class: 'text-no-wrap',
+                outputType: 'date',
+            },
+            {
                 text: this.$t('Files.LastPrintDuration').toString(),
                 value: 'last_print_duration',
                 visible: true,
                 class: 'text-no-wrap',
                 outputType: 'time',
+            },
+            {
+                text: this.$t('Files.LastTotalDuration').toString(),
+                value: 'last_total_duration',
+                visible: true,
+                class: 'text-no-wrap',
+                outputType: 'time',
+            },
+            {
+                text: this.$t('Files.LastFilamentUsed').toString(),
+                value: 'last_filament_used',
+                visible: true,
+                class: 'text-no-wrap',
+                outputType: 'length',
             },
             {
                 text: this.$t('Files.Slicer').toString(),
@@ -1011,7 +851,7 @@ export default class GcodefilesPanel extends Mixins(BaseMixin) {
         return headers.sort((a, b) => (a.pos ?? 0) - (b.pos ?? 0))
     }
 
-    set configableHeaders(newVal) {
+    set configurableHeaders(newVal) {
         const orderArray: string[] = []
         newVal.forEach((row: tableColumnSetting) => orderArray.push(row.value))
 
@@ -1019,11 +859,11 @@ export default class GcodefilesPanel extends Mixins(BaseMixin) {
     }
 
     get headers() {
-        return [...this.fixedHeaders, ...this.configableHeaders]
+        return [...this.fixedHeaders, ...this.configurableHeaders]
     }
 
     get tableColumns() {
-        return this.configableHeaders.filter((column) => column.visible)
+        return this.configurableHeaders.filter((column) => column.visible)
     }
 
     get directory() {
@@ -1102,199 +942,73 @@ export default class GcodefilesPanel extends Mixins(BaseMixin) {
         this.$store.dispatch('gui/saveSetting', { name: 'view.gcodefiles.countPerPage', value: newVal })
     }
 
-    get timelapseEnabled() {
-        return this.$store.state.server.timelapse?.settings?.enabled ?? false
-    }
-
-    set timelapseEnabled(newVal) {
-        this.$socket.emit(
-            'machine.timelapse.post_settings',
-            { enabled: newVal },
-            { action: 'server/timelapse/initSettings' }
-        )
-    }
-
-    getJobStatus(item: FileStateGcodefile) {
-        return this.$store.getters['server/history/getPrintStatus'](item.job_id)
-    }
-
-    getStatusIcon(status: string) {
+    getStatusIcon(status: string | null) {
         return this.$store.getters['server/history/getPrintStatusIcon'](status)
     }
 
-    getStatusTextColor(status: string) {
+    getStatusTextColor(status: string | null) {
         return this.$store.getters['server/history/getPrintStatusTextColor'](status)
     }
 
-    getStatusColor(status: string) {
+    getStatusColor(status: string | null) {
         return this.$store.getters['server/history/getPrintStatusIconColor'](status)
     }
 
-    dragOverUpload(e: Event) {
-        if (!this.draggingFile.status) {
-            e.preventDefault()
-            e.stopPropagation()
-
-            this.dropzone.visibility = 'visible'
-            this.dropzone.opacity = 1
-        }
-    }
-
-    dragLeaveUpload(e: Event) {
-        if (!this.draggingFile.status) {
-            e.preventDefault()
-            e.stopPropagation()
-
-            this.dropzone.visibility = 'hidden'
-            this.dropzone.opacity = 0
-        }
-    }
-
-    async dragDropUpload(e: any) {
-        if (!this.draggingFile.status) {
-            e.preventDefault()
-
-            this.dropzone.visibility = 'hidden'
-            this.dropzone.opacity = 0
-
-            if (e.dataTransfer.files.length) {
-                const files = [...e.dataTransfer.files].filter((file: File) => {
-                    const format = file.name.slice(file.name.lastIndexOf('.'))
-
-                    if (!validGcodeExtensions.includes(format)) {
-                        this.$toast.error(this.$t('Files.WrongFileUploaded', { filename: file.name }).toString())
-
-                        return false
-                    }
-
-                    return true
-                })
-
-                this.$store.dispatch('socket/addLoading', { name: 'gcodeUpload' })
-                let successFiles = []
-                this.uploadSnackbar.number = 0
-                this.uploadSnackbar.max = files.length
-                for (const file of files) {
-                    this.uploadSnackbar.number++
-                    const result = await this.doUploadFile(file)
-                    successFiles.push(result)
-                }
-
-                this.$store.dispatch('socket/removeLoading', { name: 'gcodeUpload' })
-                for (const file of successFiles) {
-                    this.$toast.success(this.$t('Files.SuccessfullyUploaded', { filename: file }).toString())
-                }
-            }
-        }
-    }
-
-    doUploadFile(file: File) {
-        let formData = new FormData()
-        let filename = file.name
-
-        this.uploadSnackbar.filename = filename
-        this.uploadSnackbar.status = true
-        this.uploadSnackbar.percent = 0
-        this.uploadSnackbar.speed = 0
-        this.uploadSnackbar.lastProgress.loaded = 0
-        this.uploadSnackbar.lastProgress.time = 0
-
-        formData.append('file', file, this.currentPath + '/' + filename)
-
-        return new Promise((resolve) => {
-            this.uploadSnackbar.cancelTokenSource = axios.CancelToken.source()
-            axios
-                .post(this.apiUrl + '/server/files/upload', formData, {
-                    cancelToken: this.uploadSnackbar.cancelTokenSource.token,
-                    headers: { 'Content-Type': 'multipart/form-data' },
-                    onUploadProgress: (progressEvent: any) => {
-                        this.uploadSnackbar.percent = (progressEvent.loaded * 100) / progressEvent.total
-                        if (this.uploadSnackbar.lastProgress.time) {
-                            const time = progressEvent.timeStamp - this.uploadSnackbar.lastProgress.time
-                            const data = progressEvent.loaded - this.uploadSnackbar.lastProgress.loaded
-
-                            if (time) this.uploadSnackbar.speed = data / (time / 1000)
-                        }
-
-                        this.uploadSnackbar.lastProgress.time = progressEvent.timeStamp
-                        this.uploadSnackbar.lastProgress.loaded = progressEvent.loaded
-                        this.uploadSnackbar.total = progressEvent.total
-                    },
-                })
-                .then((result: any) => {
-                    const filename = result.data.item.path.slice(result.data.item.path.indexOf('/') + 1)
-                    this.uploadSnackbar.status = false
-                    resolve(filename)
-                })
-                .catch(() => {
-                    this.uploadSnackbar.status = false
-                    this.$store.dispatch('socket/removeLoading', { name: 'gcodeUpload' })
-                    this.$toast.error('Cannot upload the file!')
-                })
-        })
-    }
-
     dragOverFilelist(e: any, row: any) {
-        if (this.draggingFile.status) {
-            e.preventDefault()
-            //e.stopPropagation()
+        e.preventDefault()
 
-            if (row.isDirectory) {
-                e.target.parentElement.style.backgroundColor = '#43A04720'
-            }
-        }
+        if (row.isDirectory) e.target.parentElement.style.backgroundColor = '#43A04720'
     }
 
     dragLeaveFilelist(e: any) {
-        if (this.draggingFile.status) {
-            e.preventDefault()
-            e.stopPropagation()
+        e.preventDefault()
+        e.stopPropagation()
 
-            e.target.parentElement.style.backgroundColor = 'transparent'
-        }
+        e.target.parentElement.style.backgroundColor = 'transparent'
     }
 
     async dragDropFilelist(e: any, row: any) {
-        if (this.draggingFile.status) {
-            e.preventDefault()
-            e.target.parentElement.style.backgroundColor = 'transparent'
+        e.preventDefault()
+        e.target.parentElement.style.backgroundColor = 'transparent'
 
-            let dest = ''
-            if (row.filename === '..') {
-                dest =
-                    this.currentPath.substring(0, this.currentPath.lastIndexOf('/') + 1) +
-                    this.draggingFile.item.filename
-            } else dest = this.currentPath + '/' + row.filename + '/' + this.draggingFile.item.filename
+        let dest: string
+        if (row.filename === '..') {
+            dest =
+                this.currentPath.substring(0, this.currentPath.lastIndexOf('/') + 1) + this.draggingFile.item.filename
+        } else dest = this.currentPath + '/' + row.filename + '/' + this.draggingFile.item.filename
 
-            this.$socket.emit(
-                'server.files.move',
-                {
-                    source: 'gcodes' + this.currentPath + '/' + this.draggingFile.item.filename,
-                    dest: 'gcodes' + dest,
-                },
-                { action: 'files/getMove' }
-            )
-        }
+        this.$socket.emit(
+            'server.files.move',
+            {
+                source: 'gcodes' + this.currentPath + '/' + this.draggingFile.item.filename,
+                dest: 'gcodes' + dest,
+            },
+            { action: 'files/getMove' }
+        )
     }
 
     async uploadFile() {
         if (this.$refs.fileUpload.files?.length) {
-            this.$store.dispatch('socket/addLoading', { name: 'gcodeUpload' })
-            let successFiles = []
-            this.uploadSnackbar.number = 0
-            this.uploadSnackbar.max = this.$refs.fileUpload.files.length
-            for (const file of this.$refs.fileUpload.files) {
-                this.uploadSnackbar.number++
-                const result = await this.doUploadFile(file)
-                successFiles.push(result)
-            }
-
-            this.$store.dispatch('socket/removeLoading', { name: 'gcodeUpload' })
-            for (const file of successFiles) {
-                this.$toast.success(this.$t('Files.SuccessfullyUploaded', { filename: file }).toString())
-            }
-
+            const files = [...this.$refs.fileUpload.files]
             this.$refs.fileUpload.value = ''
+
+            await this.$store.dispatch('socket/addLoading', { name: 'gcodeUpload' })
+            await this.$store.dispatch('files/uploadSetCurrentNumber', 0)
+            await this.$store.dispatch('files/uploadSetMaxNumber', this.$refs.fileUpload.files.length)
+            for (const file of files) {
+                await this.$store.dispatch('files/uploadIncrementCurrentNumber')
+                const path = this.currentPath.slice(0, 1) === '/' ? this.currentPath.slice(1) : this.currentPath
+                const result = await this.$store.dispatch('files/uploadFile', {
+                    file,
+                    path,
+                    root: 'gcodes',
+                })
+
+                if (result !== false)
+                    this.$toast.success(this.$t('Files.SuccessfullyUploaded', { filename: result }).toString())
+            }
+
+            await this.$store.dispatch('socket/removeLoading', { name: 'gcodeUpload' })
         }
     }
 
@@ -1312,7 +1026,7 @@ export default class GcodefilesPanel extends Mixins(BaseMixin) {
     }
 
     createDirectoryAction() {
-        if (this.dialogCreateDirectory.name.length && this.dialogCreateDirectory.name.indexOf(' ') === -1) {
+        if (this.dialogCreateDirectory.name.length) {
             this.dialogCreateDirectory.show = false
             this.$socket.emit(
                 'server.files.post_directory',
@@ -1330,13 +1044,17 @@ export default class GcodefilesPanel extends Mixins(BaseMixin) {
         )
     }
 
-    advancedSearch(value: string | number, search: string) {
-        return (
-            value != null &&
-            search != null &&
-            typeof value === 'string' &&
-            value.toString().toLowerCase().indexOf(search.toLowerCase()) !== -1
-        )
+    advancedSearch(value: any, search: string | null) {
+        if (search === null) return false
+        if (typeof value !== 'string') return false
+
+        value = value.toString().toLowerCase()
+        const searchSplits = search.toLowerCase().split(' ')
+        for (const searchWord of searchSplits) {
+            if (!value.includes(searchWord)) return false
+        }
+
+        return true
     }
 
     refreshMetadata(data: FileStateGcodefile[]) {
@@ -1346,14 +1064,6 @@ export default class GcodefilesPanel extends Mixins(BaseMixin) {
                 filename: 'gcodes' + this.currentPath + '/' + file.filename,
             })
         })
-    }
-
-    created() {
-        this.$socket.emit(
-            'server.files.get_directory',
-            { path: 'gcodes/' + this.currentPath },
-            { action: 'files/getDirectory' }
-        )
     }
 
     clickRow(item: FileStateGcodefile, force = false) {
@@ -1370,13 +1080,12 @@ export default class GcodefilesPanel extends Mixins(BaseMixin) {
     }
 
     clickRowGoBack() {
-        this.currentPath = this.currentPath.substr(0, this.currentPath.lastIndexOf('/'))
+        this.currentPath = this.currentPath.slice(0, this.currentPath.lastIndexOf('/'))
     }
 
-    addToQueue(item: FileStateGcodefile) {
-        let path = this.currentPath.slice(7)
-        if (path != '') path += '/'
-        const filename = path + item.filename
+    addToQueue(item: FileStateGcodefile | FileStateFile) {
+        let filename = [this.currentPath, item.filename].join('/')
+        if (filename.startsWith('/')) filename = filename.slice(1)
 
         this.$store.dispatch('server/jobQueue/addToQueue', [filename])
     }
@@ -1385,13 +1094,7 @@ export default class GcodefilesPanel extends Mixins(BaseMixin) {
         this.$store.dispatch('gui/setGcodefilesMetadata', { name: name, value: value })
     }
 
-    cancelUpload() {
-        this.uploadSnackbar.cancelTokenSource.cancel()
-        this.uploadSnackbar.status = false
-        this.$refs.fileUpload.value = ''
-    }
-
-    showContextMenu(e: any, item: FileStateFile) {
+    showContextMenu(e: any, item: FileStateGcodefile) {
         if (!this.contextMenu.shown) {
             e?.preventDefault()
             this.contextMenu.shown = true
@@ -1401,29 +1104,6 @@ export default class GcodefilesPanel extends Mixins(BaseMixin) {
             this.$nextTick(() => {
                 this.contextMenu.shown = true
             })
-        }
-    }
-
-    preheat() {
-        const file: any = this.contextMenu.item
-
-        if (
-            'first_layer_extr_temp' in file &&
-            'first_layer_bed_temp' in file &&
-            !['error', 'printing', 'paused'].includes(this.printer_state)
-        ) {
-            let gcode = ''
-            if (file.first_layer_extr_temp > 0) {
-                gcode = 'M104 S' + file.first_layer_extr_temp
-                this.$store.dispatch('server/addEvent', { message: gcode, type: 'command' })
-                this.$socket.emit('printer.gcode.script', { script: gcode })
-            }
-
-            if (file.first_layer_bed_temp > 0) {
-                gcode = 'M140 S' + file.first_layer_bed_temp
-                this.$store.dispatch('server/addEvent', { message: gcode, type: 'command' })
-                this.$socket.emit('printer.gcode.script', { script: gcode })
-            }
         }
     }
 
@@ -1510,30 +1190,24 @@ export default class GcodefilesPanel extends Mixins(BaseMixin) {
         )
     }
 
-    startPrint(filename = '') {
+    closeStartPrint() {
         this.dialogPrintFile.show = false
-        this.$socket.emit(
-            'printer.print.start',
-            { filename: this.currentPath + '/' + filename },
-            { action: 'switchToDashboard' }
-        )
     }
 
     dragFile(e: Event, item: FileStateGcodefile) {
         e.preventDefault()
-        this.draggingFile.status = true
         this.draggingFile.item = item
     }
 
     dragendFile(e: Event) {
         e.preventDefault()
-        this.draggingFile.status = false
         this.draggingFile.item = {
             isDirectory: false,
             filename: '',
             permissions: '',
             modified: new Date(),
             count_printed: 0,
+            preheat_gcode: null,
             small_thumbnail: null,
             big_thumbnail: null,
             big_thumbnail_width: null,
@@ -1561,16 +1235,24 @@ export default class GcodefilesPanel extends Mixins(BaseMixin) {
     }
 
     view3D(item: FileStateFile) {
-        this.$router.push({ path: '/viewer', query: { filename: this.currentPath + '/' + item.filename } })
+        this.$router.push({ path: '/viewer', query: { filename: 'gcodes' + this.currentPath + '/' + item.filename } })
     }
 
     deleteSelectedFiles() {
         this.selectedFiles.forEach((item: FileStateGcodefile) => {
-            this.$socket.emit(
-                'server.files.delete_file',
-                { path: 'gcodes' + this.currentPath + '/' + item.filename },
-                { action: 'files/getDeleteFile' }
-            )
+            if (item.isDirectory) {
+                this.$socket.emit(
+                    'server.files.delete_directory',
+                    { path: 'gcodes' + this.currentPath + '/' + item.filename, force: true },
+                    { action: 'files/getDeleteDir' }
+                )
+            } else {
+                this.$socket.emit(
+                    'server.files.delete_file',
+                    { path: 'gcodes' + this.currentPath + '/' + item.filename },
+                    { action: 'files/getDeleteFile' }
+                )
+            }
         })
 
         this.selectedFiles = []
@@ -1586,7 +1268,7 @@ export default class GcodefilesPanel extends Mixins(BaseMixin) {
                     return formatFilesize(value)
 
                 case 'date':
-                    return this.formatDate(value)
+                    return this.formatDateTime(value)
 
                 case 'time':
                     return this.formatPrintTime(value)
@@ -1609,3 +1291,45 @@ export default class GcodefilesPanel extends Mixins(BaseMixin) {
     }
 }
 </script>
+
+<style>
+/*noinspection CssUnusedSymbol*/
+.files-table .v-data-table-header__icon {
+    margin-left: 7px;
+}
+
+.files-table .file-list-cursor:hover {
+    cursor: pointer;
+}
+
+/*noinspection CssUnusedSymbol*/
+.file-list--select-td {
+    width: 20px;
+}
+
+/*noinspection CssUnusedSymbol*/
+.files-table th.text-start {
+    padding-right: 0 !important;
+}
+
+/*noinspection CssUnusedSymbol*/
+.v-chip.minimum-chip {
+    padding: 0;
+    min-width: 24px;
+}
+
+/*noinspection CssUnusedSymbol*/
+.v-chip.minimum-chip .v-chip__content {
+    margin: 0 auto;
+}
+
+/*noinspection CssUnusedSymbol*/
+.file-list__count_printed {
+    position: relative;
+    top: 1px;
+}
+
+.handle {
+    cursor: move;
+}
+</style>

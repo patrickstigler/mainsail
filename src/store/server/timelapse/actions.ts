@@ -13,10 +13,11 @@ export const actions: ActionTree<ServerTimelapseState, RootState> = {
         Vue.$socket.emit('machine.timelapse.lastframeinfo', {}, { action: 'server/timelapse/initLastFrameinfo' })
     },
 
-    initSettings({ commit }, payload) {
+    async initSettings({ commit, dispatch }, payload) {
         if ('requestParams' in payload) delete payload.requestParams
 
-        commit('setSettings', payload)
+        await commit('setSettings', payload)
+        await dispatch('socket/removeInitModule', 'server/timelapse/init', { root: true })
     },
 
     initLastFrameinfo({ commit }, payload) {
@@ -47,7 +48,7 @@ export const actions: ActionTree<ServerTimelapseState, RootState> = {
         }
     },
 
-    saveSetting({ commit }, payload) {
+    saveSetting(_, payload) {
         Vue.$socket.emit('machine.timelapse.post_settings', payload, { action: 'server/timelapse/initSettings' })
     },
 

@@ -9,16 +9,12 @@
         <v-row class="py-0 pr-4">
             <v-col class="pl-6">
                 <strong style="cursor: pointer" @click="hostDetailsDialog = true">Host</strong>
-                <template v-if="hostStats.cpuDesc">
-                    <v-tooltip top>
-                        <template #activator="{ on, attrs }">
-                            <small v-if="hostStats.cpuName" class="ml-2" v-bind="attrs" v-on="on">
-                                ({{ hostStats.cpuName }})
-                            </small>
-                        </template>
-                        <span>{{ hostStats.cpuDesc }}</span>
-                    </v-tooltip>
-                </template>
+                <v-tooltip top>
+                    <template #activator="{ on, attrs }">
+                        <small v-if="hostStats.cpuName" class="ml-2" v-bind="attrs" v-on="on">({{ cpuName }})</small>
+                    </template>
+                    <span>{{ cpuDesc }}</span>
+                </v-tooltip>
                 <br />
                 <div class="text-body-2">
                     <div v-if="hostStats.version">
@@ -27,16 +23,10 @@
                     <div v-if="hostStats.os">
                         {{ $t('Machine.SystemPanel.Values.Os', { os: hostStats.os }) }}
                     </div>
-                    <div
-                        v-if="
-                            hostStats.release_info &&
-                            'name' in hostStats.release_info &&
-                            hostStats.release_info.name !== '0.'
-                        "
-                        class="text-no-wrap">
+                    <div v-if="releaseName" class="text-no-wrap">
                         {{
                             $t('Machine.SystemPanel.Values.Distro', {
-                                name: hostStats.release_info.name,
+                                name: releaseName,
                                 version_id: hostStats.release_info.version_id,
                             })
                         }}
@@ -225,6 +215,15 @@ export default class SystemPanelHost extends Mixins(BaseMixin) {
         return this.$store.state.server?.system_info ?? {}
     }
 
+    get releaseName() {
+        let name = this.hostStats.release_info?.name ?? ''
+
+        if (name.startsWith('#')) return this.hostStats.release_info?.id ?? null
+        if (name.startsWith('0.')) return null
+
+        return name
+    }
+
     get directory() {
         return this.$store.getters['files/getDirectory']('gcodes')
     }
@@ -257,6 +256,22 @@ export default class SystemPanelHost extends Mixins(BaseMixin) {
         if (ipv6) return ` (${ipv6.address})`
 
         return null
+    }
+
+    get cpuDesc() {
+        let output = this.hostStats.cpuDesc
+
+        return output
+    }
+
+    get cpuName() {
+        let output = this.hostStats.cpuName
+
+        if (this.hostStats.bits) {
+            output += `, ${this.hostStats.bits}`
+        }
+
+        return output
     }
 }
 </script>

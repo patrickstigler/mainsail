@@ -1,6 +1,6 @@
 import { GetterTree } from 'vuex'
 import { ServerState, ServerStateNetworkInterface } from '@/store/server/types'
-import { formatConsoleMessage, formatFilesize, formatTime } from '@/plugins/helpers'
+import { formatConsoleMessage, formatFilesize } from '@/plugins/helpers'
 
 // eslint-disable-next-line
 export const getters: GetterTree<ServerState, any> = {
@@ -22,7 +22,6 @@ export const getters: GetterTree<ServerState, any> = {
 
                 events.unshift({
                     date: date,
-                    formatTime: formatTime(date),
                     message: message,
                     formatMessage: formatConsoleMessage(message),
                     type: 'response',
@@ -33,7 +32,9 @@ export const getters: GetterTree<ServerState, any> = {
         },
 
     getConfig: (state) => (section: string, attribute: string) => {
-        if (section in state.config && attribute in state.config[section]) return state.config[section][attribute]
+        const config = state.config?.config ?? {}
+
+        if (section in config && attribute in config[section]) return config[section][attribute]
 
         return null
     },
@@ -42,6 +43,7 @@ export const getters: GetterTree<ServerState, any> = {
         interface HostStats {
             cpuName: string | null
             cpuDesc: string | null
+            bits: string | null
             version: string | null
             pythonVersion: string | null
             os: string | null
@@ -117,6 +119,7 @@ export const getters: GetterTree<ServerState, any> = {
             output = {
                 cpuName: state.system_info?.cpu_info?.processor ?? null,
                 cpuDesc: state.system_info?.cpu_info?.cpu_desc ?? null,
+                bits: state.system_info?.cpu_info?.bits ?? null,
                 version,
                 pythonVersion,
                 os: state.system_info?.distribution?.name ?? null,

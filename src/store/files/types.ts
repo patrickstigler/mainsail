@@ -1,5 +1,16 @@
+import { CancelTokenSource } from 'axios'
+
 export interface FileState {
     filetree: FileStateFile[]
+    upload: {
+        show: boolean
+        filename: string
+        currentNumber: number
+        maxNumber: number
+        cancelTokenSource: CancelTokenSource | null
+        percent: number
+        speed: number
+    }
 }
 
 export interface FileStateFile {
@@ -28,9 +39,11 @@ export interface FileStateFile {
     metadataPulled?: boolean
     metadataRequested?: boolean
     size?: number
+    [key: string]: any
 }
 
 export interface FileStateGcodefile extends FileStateFile {
+    preheat_gcode: string | null
     small_thumbnail: string | null
     big_thumbnail: string | null
     big_thumbnail_width: number | null

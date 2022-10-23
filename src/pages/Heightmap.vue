@@ -1,52 +1,8 @@
-<style scoped>
-.rename-profile {
-    text-transform: none;
-}
-
-.currentMeshName {
-    cursor: pointer;
-    color: var(--v-primary-base);
-}
-
-.currentMeshName .v-icon {
-    opacity: 0;
-}
-
-.currentMeshName:hover .v-icon {
-    opacity: 1;
-}
-
-.rowProfile {
-}
-
-.rowProfile .colActions {
-    display: flex;
-    flex-direction: row;
-    align-items: center;
-    justify-content: flex-end;
-}
-
-.rowProfile .colName,
-.rowProfile .colVariance {
-    line-height: 48px;
-}
-
-.rowProfile .colName span.current {
-    font-weight: bold;
-    color: var(--v-primary-base);
-}
-
-.rowProfile .colActions .v-btn {
-    height: 48px;
-    width: 48px;
-}
-</style>
-
 <template>
     <div>
         <v-row v-if="klipperReadyForGui">
             <v-col class="col-12 col-md-8 pb-0">
-                <panel card-class="heightmap-map-panel" :title="$t('Heightmap.Heightmap')" :icon="mdiGrid">
+                <panel card-class="heightmap-map-panel" :title="$t('Heightmap.Heightmap').toString()" :icon="mdiGrid">
                     <template #buttons>
                         <v-btn
                             icon
@@ -115,7 +71,7 @@
                                 :loading="loadings.includes('bedMeshCalibrate')"
                                 :disabled="printerIsPrinting"
                                 :title="$t('Heightmap.TitleCalibrate')"
-                                @click="calibrateDialog = true">
+                                @click="openCalibrateMesh">
                                 {{ $t('Heightmap.Calibrate') }}
                             </v-btn>
                         </v-item-group>
@@ -190,7 +146,7 @@
             <v-col class="col-12 col-md-4">
                 <panel
                     v-if="currentProfile"
-                    :title="$t('Heightmap.CurrentMesh.Headline')"
+                    :title="$t('Heightmap.CurrentMesh.Headline').toString()"
                     card-class="heightmap-current-mesh-panel"
                     :icon="mdiInformation"
                     :collapsible="true"
@@ -236,7 +192,7 @@
                     </v-card-text>
                 </panel>
                 <panel
-                    :title="$t('Heightmap.Profiles')"
+                    :title="$t('Heightmap.Profiles').toString()"
                     card-class="heightmap-profiles-panel"
                     :icon="mdiStackOverflow"
                     :collapsible="true"
@@ -307,8 +263,8 @@
         </v-row>
         <v-row v-else>
             <v-alert
-                border="left"
-                colored-border
+                dense
+                text
                 type="warning"
                 elevation="2"
                 class="mx-auto mt-6"
@@ -319,7 +275,7 @@
         </v-row>
         <v-dialog v-model="renameDialog" persistent :max-width="400" @keydown.esc="renameDialog = false">
             <panel
-                :title="$t('Heightmap.RenameBedMeshProfile')"
+                :title="$t('Heightmap.RenameBedMeshProfile').toString()"
                 :icon="mdiGrid"
                 card-class="heightmap-rename-dialog"
                 :margin-bottom="false">
@@ -334,12 +290,16 @@
                         v-model="newName"
                         :label="$t('Heightmap.Name')"
                         required
+                        :rules="renameInputRules"
+                        @update:error="isInvalidName = !isInvalidName"
                         @keyup.enter="renameProfile"></v-text-field>
                 </v-card-text>
                 <v-card-actions>
                     <v-spacer></v-spacer>
                     <v-btn text @click="renameDialog = false">{{ $t('Heightmap.Abort') }}</v-btn>
-                    <v-btn color="primary" text @click="renameProfile">{{ $t('Heightmap.Rename') }}</v-btn>
+                    <v-btn :disabled="isInvalidName" color="primary" text @click="renameProfile">
+                        {{ $t('Heightmap.Rename') }}
+                    </v-btn>
                 </v-card-actions>
             </panel>
         </v-dialog>
@@ -349,7 +309,7 @@
             :max-width="400"
             @keydown.esc="calibrateDialog.boolShow = false">
             <panel
-                :title="$t('Heightmap.BedMeshCalibrate')"
+                :title="$t('Heightmap.BedMeshCalibrate').toString()"
                 :icon="mdiGrid"
                 card-class="heightmap-calibrate-dialog"
                 :margin-bottom="false">
@@ -375,7 +335,7 @@
         </v-dialog>
         <v-dialog v-model="removeDialog" persistent :max-width="400" @keydown.esc="removeDialog = false">
             <panel
-                :title="$t('Heightmap.BedMeshRemove')"
+                :title="$t('Heightmap.BedMeshRemove').toString()"
                 :icon="mdiGrid"
                 card-class="heightmap-remove-dialog"
                 :margin-bottom="false">
@@ -396,7 +356,7 @@
         </v-dialog>
         <v-dialog v-model="saveConfigDialog" persistent :max-width="400" @keydown.esc="saveConfigDialog = false">
             <panel
-                :title="$t('Heightmap.SAVE_CONFIG')"
+                :title="$t('Heightmap.SAVE_CONFIG').toString()"
                 :icon="mdiGrid"
                 card-class="heightmap-remove-save-dialog"
                 :margin-bottom="false">
@@ -511,6 +471,12 @@ export default class PageHeightmap extends Mixins(BaseMixin, ControlMixin) {
     }
     private newName = ''
     private oldName = ''
+    private isInvalidName = true
+    private renameInputRules = [
+        (value: string) => !!value || this.$t('Heightmap.InvalidNameEmpty'),
+        (value: string) => value !== 'default' || this.$t('Heightmap.InvalidNameReserved'),
+        (value: string) => !this.existsProfileName(value) || this.$t('Heightmap.InvalidNameAlreadyExists'),
+    ]
 
     private heightmapScale = 0.5
     private probedOpacity = 1
@@ -649,7 +615,7 @@ export default class PageHeightmap extends Mixins(BaseMixin, ControlMixin) {
     }
 
     get chart(): ECharts | null {
-        return this.$refs.heightmap ?? null
+        return this.$refs.heightmap?.chart ?? null
     }
 
     get profiles() {
@@ -1078,6 +1044,10 @@ export default class PageHeightmap extends Mixins(BaseMixin, ControlMixin) {
         }, 200)
     }
 
+    existsProfileName(name: string) {
+        return this.profiles.findIndex((profile: { name: string }) => profile.name === name) >= 0
+    }
+
     renameProfile(): void {
         this.renameDialog = false
         const gcodeNew = 'BED_MESH_PROFILE SAVE="' + this.newName + '"'
@@ -1169,3 +1139,47 @@ export default class PageHeightmap extends Mixins(BaseMixin, ControlMixin) {
     }
 }
 </script>
+
+<style scoped>
+.rename-profile {
+    text-transform: none;
+}
+
+.currentMeshName {
+    cursor: pointer;
+    color: var(--v-primary-base);
+}
+
+.currentMeshName .v-icon {
+    opacity: 0;
+}
+
+.currentMeshName:hover .v-icon {
+    opacity: 1;
+}
+
+.rowProfile {
+}
+
+.rowProfile .colActions {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: flex-end;
+}
+
+.rowProfile .colName,
+.rowProfile .colVariance {
+    line-height: 48px;
+}
+
+.rowProfile .colName span.current {
+    font-weight: bold;
+    color: var(--v-primary-base);
+}
+
+.rowProfile .colActions .v-btn {
+    height: 48px;
+    width: 48px;
+}
+</style>

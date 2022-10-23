@@ -31,7 +31,7 @@
                             </div>
                         </v-list-item>
                     </v-list>
-                    <v-divider></v-divider>
+                    <v-divider class="_fix_transparency"></v-divider>
                     <v-list dense class="py-0">
                         <v-list-item link @click="cooldown()">
                             <div class="d-flex align-center _preset-title">
@@ -81,7 +81,7 @@
             <v-card-text class="pa-0">
                 <responsive
                     :breakpoints="{
-                        mobile: (el) => el.width <= 390,
+                        mobile: (el) => el.width <= 395,
                     }">
                     <template #default="{ el }">
                         <v-simple-table class="temperature-panel-table">
@@ -120,9 +120,9 @@
                                     <td v-if="!el.is.mobile" class="state">
                                         <v-tooltip v-if="object.state !== null" top>
                                             <template #activator="{ on, attrs }">
-                                                <small v-bind="attrs" v-on="on">
+                                                <div v-bind="attrs" v-on="on">
                                                     {{ object.state }}
-                                                </small>
+                                                </div>
                                             </template>
                                             <span>{{ $t('Panels.TemperaturePanel.Avg') }}: {{ object.avgState }}</span>
                                         </v-tooltip>
@@ -149,13 +149,13 @@
                                                 {{ object.measured_min_temp }}°C
                                             </span>
                                         </v-tooltip>
-                                        <div v-for="(values, key) of object.additionSensors" :key="key">
+                                        <div v-for="(values, key) of object.additionalSensors" :key="key">
                                             <span v-if="values.bool" class="d-block">
                                                 <small>{{ values.value }} {{ values.unit }}</small>
                                             </span>
                                         </div>
                                         <div v-if="object.rpm !== null">
-                                            <small :class="object.rpmClass">{{ object.rpm }}</small>
+                                            <small :class="object.rpmClass">{{ object.rpm }} RPM</small>
                                         </div>
                                     </td>
                                     <td class="target">
@@ -175,8 +175,8 @@
                     </template>
                 </responsive>
             </v-card-text>
-            <v-card-text v-if="boolTempchart" class="pa-0">
-                <v-divider class="my-2"></v-divider>
+            <v-card-text v-if="boolTempchart" class="pa-0 d-inline-block">
+                <v-divider class="mt-0 mb-2"></v-divider>
                 <v-row>
                     <v-col class="py-0">
                         <temp-chart></temp-chart>
@@ -203,11 +203,7 @@
                                 v-model="editHeater['bool' + dataset.charAt(0).toUpperCase() + dataset.slice(1)]"
                                 :label="
                                     $t('Panels.TemperaturePanel.ShowNameInChart', {
-                                        name: $t(
-                                            'Panels.TemperaturePanel.Dataset.' +
-                                                dataset.charAt(0).toUpperCase() +
-                                                dataset.slice(1)
-                                        ),
+                                        name: $t(`Panels.TemperaturePanel.Dataset.${capitalize(dataset)}`),
                                     })
                                 "
                                 hide-details
@@ -215,14 +211,14 @@
                                 @change="setVisible(dataset)"></v-checkbox>
                         </v-col>
                     </v-row>
-                    <v-row v-for="key in Object.keys(editHeater.additionSensors)" :key="key">
+                    <v-row v-for="additionalSensor in editHeater.additionalSensors" :key="additionalSensor.name">
                         <v-col class="col-12 py-1">
                             <v-checkbox
-                                v-model="editHeater.additionSensors[key]['bool']"
-                                :label="$t('Panels.TemperaturePanel.ShowNameInList', { name: key })"
+                                v-model="additionalSensor.bool"
+                                :label="$t('Panels.TemperaturePanel.ShowNameInList', { name: additionalSensor.name })"
                                 hide-details
                                 class="mt-0"
-                                @change="setVisibleAdditionalSensor(key)"></v-checkbox>
+                                @change="setVisibleAdditionalSensor(additionalSensor)"></v-checkbox>
                         </v-col>
                     </v-row>
                     <v-row>
@@ -244,24 +240,22 @@
 <script lang="ts">
 import Component from 'vue-class-component'
 import { Mixins } from 'vue-property-decorator'
-import { convertName } from '@/plugins/helpers'
+import { capitalize, convertName } from '@/plugins/helpers'
 import { Debounce } from 'vue-debounce-decorator'
 import { GuiPresetsStatePreset } from '@/store/gui/presets/types'
-import { PrinterStateTemperatureObject } from '@/store/printer/types'
+import { PrinterStateAdditionalSensor, PrinterStateTemperatureObject } from '@/store/printer/types'
 import BaseMixin from '@/components/mixins/base'
 import ControlMixin from '@/components/mixins/control'
 import TempChart from '@/components/charts/TempChart.vue'
 import TemperatureInput from '@/components/inputs/TemperatureInput.vue'
 import Panel from '@/components/ui/Panel.vue'
 import Responsive from '@/components/ui/Responsive.vue'
-import { datasetTypes } from '@/store/variables'
-import { mdiCloseThick, mdiCog, mdiFan, mdiSnowflake, mdiFire, mdiMenuDown, mdiThermometerLines } from '@mdi/js'
+import { mdiCloseThick, mdiCog, mdiSnowflake, mdiFire, mdiMenuDown, mdiThermometerLines } from '@mdi/js'
 
 @Component({
     components: { Panel, TempChart, TemperatureInput, Responsive },
 })
 export default class TemperaturePanel extends Mixins(BaseMixin, ControlMixin) {
-    mdiFan = mdiFan
     mdiSnowflake = mdiSnowflake
     mdiCloseThick = mdiCloseThick
     mdiCog = mdiCog
@@ -270,7 +264,7 @@ export default class TemperaturePanel extends Mixins(BaseMixin, ControlMixin) {
     mdiThermometerLines = mdiThermometerLines
 
     convertName = convertName
-    datasetTypes = datasetTypes
+    capitalize = capitalize
 
     private editHeater: any = {
         bool: false,
@@ -280,7 +274,7 @@ export default class TemperaturePanel extends Mixins(BaseMixin, ControlMixin) {
         boolTarget: false,
         boolPower: false,
         boolSpeed: false,
-        additionSensors: {},
+        additionalSensors: {},
         color: '',
     }
 
@@ -353,7 +347,7 @@ export default class TemperaturePanel extends Mixins(BaseMixin, ControlMixin) {
         this.editHeater.boolTarget = this.$store.getters['gui/getDatasetValue']({ name: object.name, type: 'target' })
         this.editHeater.boolPower = this.$store.getters['gui/getDatasetValue']({ name: object.name, type: 'power' })
         this.editHeater.boolSpeed = this.$store.getters['gui/getDatasetValue']({ name: object.name, type: 'speed' })
-        this.editHeater.additionSensors = object.additionSensors
+        this.editHeater.additionalSensors = object.additionalSensors
 
         this.editHeater.bool = true
     }
@@ -366,9 +360,9 @@ export default class TemperaturePanel extends Mixins(BaseMixin, ControlMixin) {
         this.$store.dispatch('gui/saveSetting', { name, value })
     }
 
-    setVisibleAdditionalSensor(sensor: string): void {
-        const name = 'view.tempchart.datasetSettings.' + this.editHeater.name + '.additionalSensors.' + sensor
-        this.$store.dispatch('gui/saveSetting', { name, value: this.editHeater.additionSensors[sensor].bool })
+    setVisibleAdditionalSensor(sensor: PrinterStateAdditionalSensor): void {
+        const name = 'view.tempchart.datasetSettings.' + this.editHeater.name + '.additionalSensors.' + sensor.name
+        this.$store.dispatch('gui/saveSetting', { name, value: sensor.bool })
     }
 
     @Debounce(500)
@@ -403,6 +397,10 @@ export default class TemperaturePanel extends Mixins(BaseMixin, ControlMixin) {
     height: auto !important;
 }
 
+.temperature-panel-table tr:hover {
+    background: none !important;
+}
+
 .temperature-panel-table .icon {
     width: 24px;
     padding-right: 0 !important;
@@ -421,5 +419,13 @@ export default class TemperaturePanel extends Mixins(BaseMixin, ControlMixin) {
 
 .temperature-panel-table .target {
     width: 140px;
+}
+
+/*
+workaround for fixing a transparency issue
+which is assumingly a vuetify bug
+*/
+._fix_transparency {
+    background-color: #1e1e1e;
 }
 </style>

@@ -42,10 +42,32 @@ export const getters: GetterTree<FileState, any> = {
 
     getGcodeFiles:
         (state, getters, rootState, rootGetters) =>
-        (path: string, boolShowHiddenFiles: boolean, boolShowPrintedFiles: boolean) => {
-            const directory = getters['getDirectory']('gcodes' + path)
-            const baseURL = `${rootGetters['socket/getUrl']}/server/files/gcodes${encodeURI(path)}`
-            let files = directory?.childrens ?? []
+        (path: string | null, boolShowHiddenFiles: boolean, boolShowPrintedFiles: boolean) => {
+            const rootGcodes = getters['getDirectory']('gcodes')
+            if (rootGcodes === null) return []
+
+            let baseURL = `${rootGetters['socket/getUrl']}/server/files/gcodes`
+            let files: FileStateFile[] = []
+
+            if (path !== null) {
+                baseURL += encodeURI(path)
+                const directory = getters['getDirectory']('gcodes' + path)
+                files = directory?.childrens ?? []
+            } else {
+                const searchGcodes = (directory: FileStateFile, currentPath: string) => {
+                    if (directory.isDirectory && directory.childrens?.length) {
+                        directory.childrens?.forEach((file) => {
+                            if (!file.isDirectory) {
+                                const tmp = { ...file }
+                                tmp.filename = currentPath + file.filename
+                                files.push(tmp)
+                            } else searchGcodes(file, currentPath + file.filename + '/')
+                        })
+                    }
+                }
+
+                searchGcodes(rootGcodes, '')
+            }
 
             files = files.filter((file: FileStateFile) => {
                 // filter hidden files
@@ -67,6 +89,7 @@ export const getters: GetterTree<FileState, any> = {
                 const fileTimestamp = typeof file.modified.getTime === 'function' ? file.modified.getTime() : 0
                 const tmp: FileStateGcodefile = {
                     ...file,
+                    preheat_gcode: null,
                     small_thumbnail: null,
                     big_thumbnail: null,
                     big_thumbnail_width: null,
@@ -74,12 +97,34 @@ export const getters: GetterTree<FileState, any> = {
                     last_start_time: null,
                     last_end_time: null,
                     last_filament_used: null,
-                    last_status: '',
+                    last_status: null,
                     last_print_duration: null,
                     last_total_duration: null,
                 }
 
+                const preheat_gcode_array: string[] = []
+                const preheat_gcode_objects = [
+                    { name: 'first_layer_extr_temp', gcode: 'M104' },
+                    { name: 'first_layer_bed_temp', gcode: 'M140' },
+                ]
+
+                preheat_gcode_objects.forEach((object) => {
+                    if (object.name in file && file[object.name] > 1) {
+                        preheat_gcode_array.push(`${object.gcode} S${file[object.name]}`)
+                    }
+                })
+
+                if (preheat_gcode_array.length) {
+                    tmp.preheat_gcode = preheat_gcode_array.join('\n')
+                }
+
                 if (file.thumbnails?.length) {
+                    let subdirectory = ''
+                    if (path === null) {
+                        const pos = file.filename.lastIndexOf('/')
+                        if (pos > 0) subdirectory = '/' + file.filename.slice(0, pos)
+                    }
+
                     const small_thumbnail = file.thumbnails.find(
                         (thumb) =>
                             thumb.width >= thumbnailSmallMin &&
@@ -89,7 +134,7 @@ export const getters: GetterTree<FileState, any> = {
                     )
 
                     if (small_thumbnail && 'relative_path' in small_thumbnail) {
-                        tmp.small_thumbnail = `${baseURL}/${encodeURI(
+                        tmp.small_thumbnail = `${baseURL + subdirectory}/${encodeURI(
                             small_thumbnail.relative_path
                         )}?timestamp=${fileTimestamp}`
                     }
@@ -97,7 +142,7 @@ export const getters: GetterTree<FileState, any> = {
                     const big_thumbnail = file.thumbnails.find((thumb) => thumb.width >= thumbnailBigMin)
 
                     if (big_thumbnail && 'relative_path' in big_thumbnail) {
-                        tmp.big_thumbnail = `${baseURL}/${encodeURI(
+                        tmp.big_thumbnail = `${baseURL + subdirectory}/${encodeURI(
                             big_thumbnail.relative_path
                         )}?timestamp=${fileTimestamp}`
 
@@ -105,34 +150,49 @@ export const getters: GetterTree<FileState, any> = {
                     }
                 }
 
-                const fullFilename = path.length ? path + '/' + file.filename : file.filename
-                const histories = rootGetters['server/history/getPrintJobsForGcodes'](
+                const fullFilename = path && path.length ? path + '/' + file.filename : file.filename
+                let histories = rootGetters['server/history/getPrintJobsForGcodes'](
                     fullFilename,
                     fileTimestamp,
                     file.size,
                     file.uuid ?? null,
                     file.job_id
                 )
-                if (histories && histories.length) {
-                    const history = histories[0]
-                    tmp.last_end_time = new Date(history.end_time * 1000)
-                    tmp.last_filament_used = history.filament_used
-                    tmp.last_print_duration = history.print_duration
-                    tmp.last_start_time = new Date(history.start_time * 1000)
-                    tmp.last_status = history.status
-                    tmp.last_total_duration = history.total_duration
 
-                    tmp.count_printed = histories.filter(
-                        (job: ServerHistoryStateJob) => job.status === 'completed'
-                    ).length
+                if (histories && histories.length) {
+                    histories = histories.sort(
+                        (a: ServerHistoryStateJob, b: ServerHistoryStateJob) => b.start_time - a.start_time
+                    )
+
+                    const histories_completed = histories.filter(
+                        (history: ServerHistoryStateJob) => history.status === 'completed'
+                    )
+
+                    const last_history = [...histories].shift()
+                    tmp.last_status = last_history.status
+                    tmp.count_printed = histories_completed.length
+                    tmp.last_start_time = new Date(last_history.start_time * 1000)
+
+                    if (tmp.count_printed > 0) {
+                        const history_completed = histories_completed[0]
+                        tmp.last_start_time = new Date(history_completed.start_time * 1000)
+                        tmp.last_end_time = new Date(history_completed.end_time * 1000)
+                        tmp.last_filament_used = history_completed.filament_used
+                        tmp.last_print_duration = history_completed.print_duration
+                        tmp.last_total_duration = history_completed.total_duration
+                    }
                 }
 
                 if (boolShowPrintedFiles) output.push(tmp)
-                else if (tmp.last_status !== 'completed') output.push(tmp)
+                else if (tmp.count_printed === 0) output.push(tmp)
             })
 
             return output
         },
+
+    getAllGcodes: (state, getters) => {
+        return getters['getGcodeFiles'](null, false, true)
+    },
 
     getThemeFileUrl: (state, getters, rootState, rootGetters) => (acceptName: string, acceptExtensions: string[]) => {
         const directory = getters['getDirectory']('config/' + themeDir)
@@ -207,5 +267,39 @@ export const getters: GetterTree<FileState, any> = {
                 (element: FileStateFile) => element.filename !== undefined && element.filename === acceptName
             ) !== -1
         )
+    },
+
+    getSmallThumbnail: (state, getters, rootState, rootGetters) => (item: FileStateFile, currentPath: string) => {
+        if ('thumbnails' in item && item.thumbnails?.length) {
+            const thumbnail = item.thumbnails.find(
+                (thumb) =>
+                    thumb.width >= thumbnailSmallMin &&
+                    thumb.width <= thumbnailSmallMax &&
+                    thumb.height >= thumbnailSmallMin &&
+                    thumb.height <= thumbnailSmallMax
+            )
+
+            if (thumbnail && 'relative_path' in thumbnail) {
+                return `${rootGetters['socket/getUrl']}/server/files/${currentPath}/${encodeURI(
+                    thumbnail.relative_path
+                )}?timestamp=${item.modified.getTime()}`
+            }
+        }
+
+        return ''
+    },
+
+    getBigThumbnail: (state, getters, rootState, rootGetters) => (item: FileStateFile, currentPath: string) => {
+        if ('thumbnails' in item && item.thumbnails?.length) {
+            const thumbnail = item.thumbnails.find((thumb) => thumb.width >= thumbnailBigMin)
+
+            if (thumbnail && 'relative_path' in thumbnail) {
+                return `${rootGetters['socket/getUrl']}/server/files/${encodeURI(currentPath)}/${encodeURI(
+                    thumbnail.relative_path
+                )}?timestamp=${item.modified.getTime()}`
+            }
+        }
+
+        return ''
     },
 }

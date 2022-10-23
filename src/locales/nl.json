@@ -1,10 +1,33 @@
 {
     "App": {
         "Notifications": {
+            "DependencyDescription": "De huidige {name} versie ondersteunt niet alle functies van Mainsail. Update {name} naar ten minste {neededVersion}.",
+            "DependencyName": "Afhankelijkheid: {name}",
+            "DismissAll": "Dismiss all",
             "KlipperWarnings": {
                 "DeprecatedOption": "Optie '{option}' in sectie '{section}' is verouderd en wordt in een toekomstige versie verwijderd.",
-                "DeprecatedValue": "Waarde '{value}' in optie '{option}' in sectie '{section}' is verouderd en wordt in een toekomstige versie verwijderd."
-            }
+                "DeprecatedOptionHeadline": "Verouderde Klipper optie",
+                "DeprecatedValue": "Waarde '{value}' in optie '{option}' in sectie '{section}' is verouderd en wordt in een toekomstige versie verwijderd.",
+                "DeprecatedValueHeadline": "Verouderde Klipper waarde",
+                "KlipperWarning": "Klipper waarschuwing"
+            },
+            "MoonrakerWarnings": {
+                "MoonrakerComponent": "Moonraker: {component}",
+                "MoonrakerFailedComponentDescription": "Bij het laden van de moonraker component '{component}' is een fout opgetreden. Controleer de logs en verhelp het probleem.",
+                "MoonrakerWarning": "Moonraker waarschuwing",
+                "UnparsedConfigOption": "Onbekende config optie '{option}: {value}' gedetecteerd in sectie [{section}]. Dit kan een optie zijn die niet langer beschikbaar is of een module die niet juist geladen is. In de toekomst zal dit een foutmeldig geven bij het opstarten.",
+                "UnparsedConfigSection": "Onbekende config sectie [{section}] gedetecteerd. Dit kan module zijn die niet juist geladen is. In de toekomst zal dit een foutmeldig geven bij het opstarten."
+            },
+            "Never": "nooit",
+            "NextReboot": "volgende reboot",
+            "NoNotification": "Geen notificaties beschikbaar",
+            "Notifications": "Notificaties",
+            "Remind": "Herinnering:"
+        },
+        "NumberInput": {
+            "GreaterOrEqualError": "Moet groter of gelijk zijn dan {min}!",
+            "MustBeBetweenError": "Moet tussen {min} en {max} liggen!",
+            "NoEmptyAllowedError": "Invoer mag niet leeg zijn!"
         },
         "Printers": "Printers",
         "ThrottledStates": {
@@ -16,8 +39,6 @@
             "DescriptionPreviouslyUnderVolted": "rPI voedingsspanning is onder de 4.65V sinds de laatste power-on.",
             "DescriptionTemperatureLimitActive": "rPi uC (alleen 3A+/3B+) temperatuur is momenteel boven de soft limit (standaard 60C).",
             "DescriptionUnderVoltageDetected": "rPI voedingsspanning is momenteel onder de 4.65V",
-            "HeadlineCurrentFlags": "Huidige Flags",
-            "HeadlinePreviouslyFlags": "Vorige Flags",
             "TitleCurrentlyThrottled": "Momenteel Gethrottled",
             "TitleFrequencyCapped": "Frequentie Beperkt",
             "TitlePreviouslyFrequencyCapped": "Voorheen Freqentie Beperkt",
@@ -91,6 +112,7 @@
         "CheckMoonrakerLog": "Als deze melding vaker getoond wordt, kijk in de logs op:",
         "Connecting": "Verbinden met {host}",
         "Failed": "Verbinding mislukt",
+        "Initializing": "Initialiseren",
         "TryAgain": "probeer nogmaals"
     },
     "Console": {
@@ -101,14 +123,21 @@
         "SendCode": "Verzend code...",
         "SetupConsole": "Instellingen"
     },
+    "Dialogs": {
+        "StartPrint": {
+            "Cancel": "Annuleer",
+            "DoYouWantToStartFilename": "Wil je {filename} starten?",
+            "Headline": "Start print",
+            "Print": "print",
+            "Timelapse": "Timelapse"
+        }
+    },
     "Editor": {
-        "Cancel": "Annuleer",
         "ConfigReference": "Config Referentie",
         "DontSave": "Sla niet op",
         "Downloading": "Downloaden",
         "FailedSave": "{filename} kon niet worden geupload!",
         "FileReadOnly": "alleen-lezen",
-        "Minimap": "Toon minimap",
         "SaveClose": "Bewaar & sluiten",
         "SaveRestart": "Bewaar & herstart",
         "SuccessfullySaved": "{filename} succesvol opgeslagen.",
@@ -126,19 +155,20 @@
     "Files": {
         "AddToQueue": "Voeg aan wachtrij toe",
         "AllFiles": "Alle",
+        "BedTemp": "Bed Temp.",
         "Cancel": "Annuleer",
+        "ChamberTemp": "Kamer Temp.",
         "Create": "Creëer",
         "CreateNewDirectory": "Creëer nieuwe Map",
         "CurrentPath": "Huidige pad",
         "Delete": "Verwijder",
         "DeleteDirectory": "Verwijder map",
         "DeleteDirectoryQuestion": "Weet je zeker dat je de \"{name}\" map wil verwijderen met alle inhoud?",
+        "DeleteSelectedQuestion": "Weet je zeker dat je {count} geselecteerde bestanden wil verwijderen?",
         "Download": "Download",
-        "Downloading": "Downloaden",
-        "DoYouWantToStartFilename": "Wil je {filename} starten?",
-        "DropFilesToAddGcode": "Sleep bestanden om G-Code toe te voegen",
         "EditFile": "Bewerk bestand",
         "Empty": "Leeg",
+        "ExtruderTemp": "Extruder Temp.",
         "Filament": "Filament",
         "FilamentName": "Filamentnaam",
         "FilamentType": "Filament Type",
@@ -149,8 +179,14 @@
         "Free": "Vrij",
         "FreeDisk": "Vrije schijfruimte",
         "GCodeFiles": "G-Code Bestanden",
+        "GcodesRootDirectoryDoesntExists": "Geen G-Code directory gevonden. Controleer de optie \"path\" in de [virtual_sdcard] sectie van de Klipper configuratie.",
         "HiddenFiles": "Verborgen bestanden",
+        "LastEndTime": "Laatste eindtijd",
+        "LastFilamentUsed": "Laatst gebruikte filament",
         "LastModified": "Laatst bewerkt",
+        "LastPrintDuration": "Laatste printduur",
+        "LastStartTime": "Laatste starttijd",
+        "LastTotalDuration": "Laatste totale duur",
         "LayerHeight": "Laaghoogte",
         "Name": "Naam",
         "NewDirectory": "Nieuwe map",
@@ -167,19 +203,19 @@
         "Search": "Zoeken",
         "SetupCurrentList": "Instellingen",
         "Slicer": "Slicer",
-        "StartJob": "Starten",
-        "StartPrint": "Start print",
         "SuccessfullyCreated": "{filename} succesvol aangemaakt.",
         "SuccessfullyDeleted": "{filename} succesvol verwijderd.",
         "SuccessfullyMoved": "{filename} succesvol verplaatsd.",
         "SuccessfullyRenamed": "{filename} succesvol hernoemd.",
         "SuccessfullyUploaded": "Upload van {filename} succesvol!",
         "Total": "Totaal",
-        "Uploading": "Uploaden",
         "UploadNewGcode": "Upload nieuwe G-Code",
         "Used": "Gebruikt",
-        "View3D": "Bekijk in 3D",
-        "WrongFileUploaded": "Upload is gewijgerd voor {filename}. Verkeerd bestandsformaat!"
+        "View3D": "Bekijk in 3D"
+    },
+    "FullscreenUpload": {
+        "CannotUploadFile": "Kan bestand niet uploaden!",
+        "DropFilesToUploadFiles": "Sleep bestand hier om te uploaden."
     },
     "GCodeViewer": {
         "ClearLoadedFile": "Leeg",
@@ -221,32 +257,43 @@
             "Variance": "Variatie"
         },
         "DeleteBedMeshProfile": "Verwijder Bed Mesh Profiel",
-        "Deleted": "verwijderd",
-        "DoYouReallyWantToCalibrate": "Weet je zeker dat je een bedkalibratie wil starten?",
         "DoYouReallyWantToDelete": "Weet je zeker dat je het profiel \"{name}\" wil verwijderen?",
         "ErrorKlipperNotReady": "Klipper nog niet klaar . Hoogtekaart uitgeschakeld.",
         "Flat": "Vlak",
         "Heightmap": "Hoogtekaart",
+        "InvalidNameAlreadyExists": "Profielnaam bestaat al, kies een andere profielnaam.",
+        "InvalidNameEmpty": "Veld mag niet leeg zijn!",
+        "InvalidNameReserved": "Profiel 'default' is gereserveerd, kies een andere profielnaam.",
+        "Later": "Later",
         "Mesh": "Mesh",
         "Name": "Naam",
         "NoBedMeshHasBeenLoadedYet": "Er is nog geen bed_mesh ingeladen",
         "NoProfile": "Geen profiel beschikbaar",
+        "Ok": "Ok",
         "Probed": "Geprobed",
         "Profiles": "Profielen",
         "Remove": "verwijderen",
+        "RemoveSaveDescription": "Het bed_mesh profiel is als verwijderd gemarkeerd. Klik op SAVE_CONFIG om het van de printer.cfg te verwijderen en Klipper te herstarten.",
         "Rename": "hernoemen",
         "RenameBedMeshProfile": "Hernoem Bed Mesh Profiel",
-        "Scale": "Schaal",
+        "SAVE_CONFIG": "SAVE_CONFIG",
+        "ScaleGradient": "Kleurverloop schalen",
+        "ScaleZMax": "Schaal z-max",
         "TitleCalibrate": "Kalibreer nieuwe bed mesh",
         "TitleClear": "Verijwder bed mesh",
         "TitleHomeAll": "Home alles",
         "Wireframe": "Draadmodel"
     },
     "History": {
+        "AddNote": "Voeg notitie toe",
         "AllJobs": "Alle",
         "AvgPrinttime": "Gemiddelde printtijd",
+        "Cancel": "Annuleer",
+        "CreateNote": "Creëer notitie",
         "Delete": "Verwijder",
+        "DeleteSelectedQuestion": "Weet je zeker dat je {count} geselecteerde jobs wil verwijderen?",
         "Details": "Details",
+        "EditNote": "Bewerk notitie",
         "Empty": "leeg",
         "EndTime": "Eindttijd",
         "EstimatedFilament": "Geschat Filament",
@@ -267,19 +314,34 @@
         "LastModified": "Laatst Gewijzigd",
         "LayerHeight": "Laaghoogte",
         "LongestPrinttime": "Langste Printtijd",
+        "Note": "Notitie",
         "ObjectHeight": "Object Hoogte",
         "PrintDuration": "Print duur",
         "PrintHistory": "Print Geschiedenis",
         "PrintTime": "Printtijd",
         "PrinttimeAvg": "Printtijd gemiddeld",
         "Reprint": "Opnieuw printen",
+        "Save": "Opslaan",
         "Search": "zoek",
-        "ShowStatusName": "Toon \"{name}\" ({count})",
+        "SelectedFilamentUsed": "Geselecteerd Filament verbruikt",
+        "SelectedJobs": "Geselecteerde jobs",
+        "SelectedPrinttime": "Geselecteerde printtijd",
         "Slicer": "Slicer",
         "SlicerVersion": "Slicer Versie",
         "StartTime": "Starttijd",
         "Statistics": "Statistieken",
         "Status": "Status",
+        "StatusValues": {
+            "cancelled": "Geannuleerd",
+            "completed": "Voltooid",
+            "error": "Fout",
+            "in_progress": "Bezig",
+            "klippy_disconnect": "Klippy verbinding verbroken",
+            "klippy_shutdown": "Klippy afgesloten",
+            "Others": "Overige",
+            "server_exit": "Server exit"
+        },
+        "TitleExportHistory": "Export geschiedenis",
         "TitleRefreshHistory": "Ververs geschiedenis",
         "TitleSettings": "Instellingen",
         "TotalDuration": "Totale Tijd",
@@ -290,11 +352,11 @@
     },
     "JobQueue": {
         "AllJobs": "Alle jobs",
-        "Delete": "Verwijderen",
         "Empty": "Leeg",
         "JobQueue": "Job wachtrij",
         "Jobs": "Jobs",
         "Pause": "Pauze",
+        "RemoveFromQueue": "Verwijder uit wachtrij",
         "Start": "Start"
     },
     "Machine": {
@@ -302,6 +364,7 @@
             "AllFiles": "Alle",
             "Cancel": "Annuleer",
             "ConfigFiles": "Config bestanden",
+            "ConfigRootDirectoryDoesntExists": "Geen configuratie directory gevonden. Controleer de optie \"config_path\" in de [file_manager] sectie van de Moonraker configuratie.",
             "Create": "Maak",
             "CreateDirectory": "Maak map",
             "CreateFile": "Maak bestand",
@@ -309,6 +372,7 @@
             "Delete": "Verwijder",
             "DeleteDirectory": "Verwijder map",
             "DeleteDirectoryQuestion": "Weet je zeker dat je de \"{name}\" map wil verwijderen met alle inhoud?",
+            "DeleteSelectedQuestion": "Verwijder {count} geselecteerde elementen?",
             "Download": "Download",
             "EditFile": "Bewerk bestand",
             "Empty": "Leeg",
@@ -324,6 +388,7 @@
             "Rename": "Hernoem",
             "RenameDirectory": "Hernoem map",
             "RenameFile": "Hernoem bestand",
+            "Root": "Root",
             "SetupCurrentList": "Instellingen",
             "ShowFile": "Toon bestand",
             "Total": "Totaal",
@@ -342,22 +407,34 @@
             "Logfiles": "Logbestanden"
         },
         "SystemPanel": {
-            "Awake": "Wakker",
             "Constants": "Constanten",
-            "Distro": "Distributie",
-            "Frequency": "Freq",
+            "Cpu": "CPU",
             "HostDetails": "Host details",
             "LastStats": "Laatste statistieken",
             "Load": "Load",
             "Memory": "Mem",
-            "Os": "OS",
+            "NoMoreInfos": "Geen informatie meer",
             "SystemLoad": "Systeem Loads",
-            "Version": "Versie"
+            "Values": {
+                "Awake": "Wakker: {awake}",
+                "Bandwidth": "Bandbreedte: {bandwidth}/s",
+                "Distro": "Distributie: {name} {version_id}",
+                "Frequency": "Freq: {frequency}",
+                "Load": "Load: {load}",
+                "Memory": "Geheugen: {memory}",
+                "Os": "OS: {os}",
+                "Received": "Ontvangen: {received}",
+                "Temp": "Temp: {temp}°C",
+                "TempMax": "max: {temp}°C",
+                "TempMin": "min: {temp}°C",
+                "Transmitted": "Verzonden: {transmitted}",
+                "Version": "Versie: {version}"
+            }
         },
         "UpdatePanel": {
             "CheckForUpdates": "Controleer op updates",
             "Commits": "Commits",
-            "CommitsAvailabe": "geen commits beschikbaar | {count} commit beschikbaar | {count} commits beschikbaar",
+            "CommitsAvailable": "geen commits beschikbaar | {count} commit beschikbaar | {count} commits beschikbaar",
             "CommitsOnDate": "Gecommit op {date}",
             "CommittedDaysAgo": "{days} dagen geleden gecommit",
             "CommittedHoursAgo": "{days} uur geleden gecommit",
@@ -380,9 +457,30 @@
     },
     "Panels": {
         "ExtruderControlPanel": {
+            "Allowed": "Toegestaan",
+            "EstimatedExtrusion": "Geschatte extrusie:",
             "Extrude": "Extrude",
+            "ExtruderTempTooLow": "Extruder temp. <",
             "ExtrusionFactor": "Extrusie factor",
-            "Retract": "Retract"
+            "ExtrusionFeedrate": "Extrusion Feedrate",
+            "FilamentLength": "Filamentlengte",
+            "FirmwareRetractionSettings": {
+                "RetractLength": "Retractie lengte",
+                "RetractSpeed": "Retractie snelheid",
+                "UnretractExtraLength": "Extra lengte uitvoer",
+                "UnretractSpeed": "Uitvoer snelheid"
+            },
+            "Headline": "Extruder",
+            "LoadFilament": "Filament laden",
+            "PressureAdvanceSettings": {
+                "Advance": "Advance",
+                "Extruder": "Extruder",
+                "SmoothTime": "Smooth Time"
+            },
+            "Requested": "Aangevraagd",
+            "Retract": "Retract",
+            "TooLargeExtrusion": "Extrusie te lang!",
+            "UnloadFilament": "Filament ontladen"
         },
         "FarmPrinterPanel": {
             "ReconnectToPrinter": "Opnieuw verbinden",
@@ -392,33 +490,16 @@
         "KlippyStatePanel": {
             "FirmwareRestart": "Firmware Herstart",
             "KlipperCheck": "Controleer of de Klipper service draait en een UDS (Unix Domain Socket) geconfigureerd is.",
-            "KlippyInfo": "Moonraker kan niet verbinden met Klippy!\nControleer of de Klipper Service draait en een UDS (Unix Domain Socket) is geconfigureerd.",
-            "KlippyState": "Klippy-Status",
             "MoonrakerCannotConnect": "Moonraker kan niet met Klipper verbinden!",
             "Restart": "Herstart"
         },
         "MachineSettingsPanel": {
-            "FirmwareRetractionSettings": {
-                "FirmwareRetraction": "Firmware Retracties",
-                "RetractLength": "Retractie lengte",
-                "RetractSpeed": "Retractie snelheid",
-                "UnretractExtraLength": "Extra lengte uitvoer",
-                "UnretractSpeed": "Uitvoer snelheid"
-            },
             "Headline": "Machine instellingen",
             "MotionSettings": {
                 "Acceleration": "Acceleratie",
-                "Deceleration": "Vertraging",
                 "MaxAccelToDecel": "Max Accel. naar Decel.",
-                "Motion": "Beweging",
                 "SquareCornerVelocity": "Hoeksnelheid (SCV)",
                 "Velocity": "Snelheid"
-            },
-            "PressureAdvanceSettings": {
-                "Advance": "Advance",
-                "Extruder": "Extruder",
-                "PressureAdvance": "Pressure Advance",
-                "SmoothTime": "Smooth Time"
             }
         },
         "MacrosPanel": {
@@ -426,13 +507,9 @@
             "Send": "verstuur"
         },
         "MiniconsolePanel": {
-            "Console": "Console",
-            "CustomFilters": "Eigen filters",
-            "Empty": "Leeg",
             "Headline": "Console",
             "HideTemperatures": "Verberg temperaturen",
             "HideTimelapse": "Verberg Timelapse",
-            "Send": "Verzend",
             "SendCode": "Verzend code...",
             "SetupConsole": "Console Instellingen"
         },
@@ -443,28 +520,12 @@
             "MoreInformation": "meer informatie"
         },
         "MiscellaneousPanel": {
-            "ExtrusionFactor": "Extrusie factor",
             "Headline": "Overige",
-            "Miscellaneous": "Overige",
-            "PrintSettings": "Printinstellingen",
             "RunoutSensor": {
                 "Detected": "gedetecteerd",
                 "Disabled": "uitgeschakeld",
                 "Empty": "Leeg"
-            },
-            "SpeedFactor": "Snelheid factor"
-        },
-        "MoonrakerFailedComponentsPanel": {
-            "DownloadLog": "Download Log",
-            "FollowingPluginHasAnError": "De volgende plugin heeft een fout:",
-            "MoonrakerErrorInfo": "Er is een fout was gedetecteerd bij het laden van de moonraker componenten. Controleer de logfile los de fout op.",
-            "MoonrakerFailedComponents": "Fouten in Moonraker Componenten"
-        },
-        "MoonrakerStatePanel": {
-            "DownloadLog": "Download Log",
-            "FollowingPluginHasAnError": "De volgende plugin heeft een fout:",
-            "MoonrakerErrorInfo": "Een fout was ontdekt bij het laden van de Moonraker componenten. Controleer de logfile en fix het probleem.",
-            "MoonrakerWarnings": "Moonraker Waarschuwingen"
+            }
         },
         "PowerControlPanel": {
             "Error": "Fout",
@@ -476,6 +537,8 @@
             "CancelPrint": "Annuleer print",
             "ClearPrintStats": "Wis print statistieken",
             "Difference": "Verschil",
+            "EmptyGcodes": "Geen G-Code beschikbaar.",
+            "EmptyJobqueue": "Er zijn geen bestanden in de wachtrij.",
             "Estimate": "Schatting",
             "ETA": "ETA",
             "ExcludeObject": {
@@ -487,25 +550,29 @@
             },
             "Filament": "Filament",
             "File": "Bestand",
+            "Files": "Bestanden",
             "Flow": "Flow",
             "Headline": "Status",
+            "Jobqueue": "Wachtrij ({count})",
+            "JobqueueMoreFiles": "geen jobs meer | nog een job |  {count} jobs",
             "Layer": "Laag",
             "Max": "max",
             "ObjectHeight": "Objecthoogte",
             "PausePrint": "Pauzeer print",
             "Print": "Print",
+            "PrintTime": "Printtijd",
             "ReprintJob": "Herprint job",
             "Requested": "Aangevraagd",
             "ResumePrint": "Hervat print",
             "Slicer": "Slicer",
             "Speed": "Snelheid",
+            "Status": "Status",
             "Total": "Totaal",
             "Unknown": "Onbekend"
         },
         "TemperaturePanel": {
             "AutoscaleChart": "Schaal automatisch",
             "Avg": "Gemiddeld",
-            "Color": "Kleur",
             "Cooldown": "Afkoelen",
             "Current": "Huidige",
             "Dataset": {
@@ -515,43 +582,29 @@
                 "Temperature": "huidige temperatuur"
             },
             "Headline": "Temperaturen",
-            "InList": "in lijst",
             "Max": "max",
             "Min": "min",
             "Name": "Naam",
             "Presets": "Presets",
             "SetupTemperatures": "Stel Temperaturen in",
-            "Show": "Toon",
             "ShowChart": "Toon Grafiek",
-            "ShowCurrentTemperatureInChart": "Toon huidige temperatuur in de grafiek",
             "ShowNameInChart": "Toon {name} in de grafiek",
             "ShowNameInList": "Toon {name} in de lijst",
-            "ShowPWMPowerInChart": "Toon PWM-kracht in de grafiek",
-            "ShowTargetTemperatureInChart": "Toon doeltemperatuur in de grafiek",
             "State": "Status",
             "Target": "Doel",
-            "Temperatures": "Temperaturen",
             "TemperaturesInChart": "Temperatuur [°C]",
             "TempTooHigh": "Temperatuur te hoog voor {name}! (max: {max})",
-            "TempTooLow": "Temperatuur te laag voor {name}! (min: {min})",
-            "UNKNOWN": "ONBEKEND"
+            "TempTooLow": "Temperatuur te laag voor {name}! (min: {min})"
         },
         "ToolheadControlPanel": {
             "Absolute": "absoluut",
             "ALL": "ALLES",
-            "Controls": "Bediening",
-            "Home": "Home",
-            "HotendTooCold": "Hotend temp. lager dan",
-            "InvertX": "Inverteer X",
-            "InvertY": "Inverteer Y",
-            "InvertZ": "Inverteer Z",
-            "Macros": "Macros",
+            "Headline": "Toolhead",
             "PleaseConfigureSteps": "Configureer steps",
             "Position": "Positie",
             "QGL": "QGL",
             "Relative": "relatief",
             "SettingsInterfaceControl": "Instllingen > Interface > Bediening",
-            "SetupControls": "Bewerk Bediening",
             "SpeedFactor": "Snelheid factor",
             "ZTilt": "Z Tilt"
         },
@@ -559,12 +612,11 @@
             "All": "Alle",
             "FPS": "FPS",
             "Headline": "Webcam",
-            "UnknownWebcamService": "Onbekende Webcam Service",
-            "UrlNotAvailable": "URL niet beschikbaar",
-            "Webcam": "Webcam"
+            "NoWebcam": "Geen webcam beschikbaar. Voeg een webcam toe onder \"Interface Settings\" -> \"Webcams\".",
+            "UnknownWebcamService": "Onbekende Webcam Service"
         },
         "ZoffsetPanel": {
-            "CurrentOffset": "Huidige offset",
+            "Clear": "Wissen",
             "Headline": "Z offset",
             "Later": "Later",
             "Ok": "Ok",
@@ -574,8 +626,7 @@
             "SaveInfoDescriptionPrint": "De nieuwe z-offset is berekend en geregistreerd. Klik na het printen op \"SAVE CONFIG\" om de nieuwe z-offset op te slaan in je printer.cf en Klipper te herstarten.",
             "SaveInfoHeadline": "Informatie",
             "ToEndstop": "naar Endstop",
-            "ToProbe": "naar Probe",
-            "ZBabyStepping": "Z Baby Stepping"
+            "ToProbe": "naar Probe"
         }
     },
     "PowerDeviceChangeDialog": {
@@ -599,6 +650,7 @@
     },
     "SelectPrinterDialog": {
         "AddPrinter": "Voeg printer toe",
+        "AddPrintersToJson": "Voeg de printers toe aan de config.json",
         "CannotConnectTo": "Kan niet verbinden met {host}.",
         "ChangePrinter": "Wijzig printer",
         "Connecting": "Verbinden met {host}",
@@ -606,7 +658,9 @@
         "EditPrinter": "Bewerk printer",
         "Hello": "Hoi en welkom bij de op afstand modus van Mainsail!",
         "HostnameInvalid": "ongeldige Hostname/IP",
+        "HostnameIp": "Hostname/IP",
         "HostnameRequired": "Hostname is verplicht",
+        "Port": "Poort",
         "PortRequired": "Poort is verplicht",
         "RememberToAdd": "Vergeet niet om {cors} in moonraker.conf toe te voegen binnen 'cors_domains'",
         "SelectPrinter": "Selecteer printer",
@@ -628,6 +682,7 @@
             "EntryStyle": "Invoer stijl",
             "EntryStyleCompact": "compact",
             "EntryStyleDefault": "standaard",
+            "Filters": "Filters",
             "Height": "Hoogte",
             "HideTemperatures": "Verberg temperaturen",
             "HideTimelapse": "Verberg Timelapse",
@@ -641,21 +696,29 @@
             "Circle": "Cirkel",
             "Control": "Bediening",
             "Cross": "Kruis",
+            "EnableXYHoming": "Activeer gecombineerde X & Y homing",
+            "EstimatedExtrusionInfo": "Toon geschatte extrusie info",
+            "EstimatedExtrusionInfoDescription": "Toon / Verberg informatie over geschatte extrusies gebaseerd op extrusie-soort en feedrate",
             "InvertXMovement": "Inverteer X beweging",
             "InvertYMovement": "Inverteer Y beweging",
             "InvertZMovement": "Inverteer Z beweging",
+            "IsDefault": "(standaard)",
             "MaximumValues": "Maximale waarden: {maximum}",
             "MaximumValuesVisibility": "Maximum van {maximum} waarden is geadviseerd voor beste overzicht",
             "MinimumValues": "Minimale waarden: {minimum}",
+            "MotorsOff": "Motoren uit{isDefault}",
             "MoveDistancesEInMm": "Afstanden E in mm",
             "MoveDistancesInMm": "Afstanden in mm",
             "MoveDistancesXYInMm": "Afstanden XY in mm",
             "MoveDistancesZInMm": "Afstanden Z in mm",
+            "QuadGantryLevel": "Quad Gantry Level{isDefault}",
             "SpeedEInMms": "Snelheid E in mm/s",
             "SpeedXY": "Snelheid XY",
             "SpeedZ": "Snelheid Z",
             "Style": "Stijl",
-            "ValueGreaterThan": "Waarde moet groter zijn dan {value}"
+            "ValueGreaterThan": "Waarde moet groter zijn dan {value}",
+            "ZOffsetIncrements": "Z-Offset incrementies (in mm)",
+            "ZTiltAdjust": "Z-Tilt Adjust{isDefault}"
         },
         "DashboardTab": {
             "Dashboard": "Dashboard",
@@ -670,6 +733,10 @@
             "ConfirmUnsavedChanges": "Vraag om niet-opgeslagen wijzigingen op te slaan of te verwerpen",
             "ConfirmUnsavedChangesDescription": "Indien ingeschakeld, is een bevestiging nodig om de niet-opgeslagen aanpassingen op te slaan of te verwerpen. Wanneer niet ingeschakeld worden de aanpassingen zonder notificatie verworpen.",
             "Editor": "Editor",
+            "KlipperRestartMethod": "Klipper restart methode",
+            "KlipperRestartMethodDescription": "Selecteerd welke herstart methode gebruikt wordt bij 'Save & Restart' na het bewerken van de Klipper config files.",
+            "MoonrakerRestartInstance": "Moonraker instantie herstarten",
+            "MoonrakerRestartInstanceDescription": "Selecteer welke Moonraker service herstart na 'Save & Restart' bij het bewerken van Moonraker config bestanden.",
             "UseEscToClose": "Gebruik ESC om de editor te sluiten",
             "UseEscToCloseDescription": "Laat de ESC toets de editor sluiten"
         },
@@ -680,6 +747,7 @@
             "GridColor": "Rasterkleur",
             "MaxFeed": "Max Doorvoer",
             "MinFeed": "Min Doorvoer",
+            "ProgressColor": "Voortgangskleur",
             "ShowAxes": "Toon Assen"
         },
         "GeneralTab": {
@@ -689,6 +757,14 @@
             "CalcEstimateTimeDescription": "Als meerdere geselecteerd zijn, wordt het gemiddelde berekend",
             "CalcEtaTime": "ETA berekening",
             "CalcEtaTimeDescription": "Als meerdere geselecteerd zijn, wordt het gemiddelde berekend",
+            "CalcPrintProgress": "Printvoortgang berekening",
+            "CalcPrintProgressDescription": "Methode om de voortgang van de print te berekenen.",
+            "CalcPrintProgressItems": {
+                "Filament": "Filament",
+                "FileAbsolute": "Bestandslocatie (absoluut)",
+                "FileRelative": "Bestandslocatie (relatief)",
+                "Slicer": "Slicer (M73)"
+            },
             "CannotReadJson": "Kan het backup bestand niet lezen/verwerken. ",
             "DbConsoleHistory": "Console Geschiedenis",
             "DbHistoryJobs": "Geschiedenis Jobs",
@@ -696,6 +772,11 @@
             "DbTimelapseSettings": "Timelapse Instellingen",
             "DbView": "Weergaveinstellingen",
             "DbWebcams": "Webcams",
+            "EstimateValues": {
+                "Filament": "Filament",
+                "File": "Bestand",
+                "Slicer": "Slicer"
+            },
             "FactoryDialog": "Selecteer de secties die je wil resetten:",
             "FactoryReset": "Herstel naar fabrieksinstellingen",
             "General": "Algemeen",
@@ -750,9 +831,13 @@
             "CustomGCode": "Custom G-Code",
             "EditCooldown": "Bewerk Afkoelen",
             "EditHeadline": "Bewerk Preset",
+            "ErrorInvalidValue": "Ongeldige waarde",
+            "ErrorNameNotUnique": "Naam bestaat al",
+            "ErrorNameRequired": "Naam verplicht",
             "Name": "Naam",
             "PreheatPresets": "Voorverwarm Presets",
             "PresetInfo": "Je moet een minimum doeltemperatuur of custom G-Code instellen.",
+            "PresetNamePlaceholder": "Voorbeeld naam (verplicht)",
             "StoreButton": "Sla preset op",
             "UpdateButton": "Update preset.",
             "UpdateCooldown": "Update afkoelen"
@@ -763,7 +848,8 @@
             "Hostname": "Hostname",
             "Port": "Poort",
             "RemotePrinters": "Printers op afstand",
-            "UpdatePrinter": "Update Printer"
+            "UpdatePrinter": "Update Printer",
+            "UseConfigJson": "InstanceDB = JSON gedetecteerd. Gebruik de config.json om de printerlijst aan te passen."
         },
         "TimelapseTab": {
             "Autorender": "Autorender",
@@ -843,8 +929,6 @@
             "ConfirmOnPowerDeviceChangeDescription": "Vraag om een bevesting bij wijzigen van Stroomvoorziening van apparaten",
             "DisplayCANCEL_PRINT": "Toon CANCEL_PRINT",
             "DisplayCANCEL_PRINTDescription": "Toont de CANCEL_PRINT knop altijd - geen bevestiging nodig.",
-            "DisplayZOffset": "Toon Z-Offset Paneel",
-            "DisplayZOffsetDescription": "Zo niet, wordt het alleen getoond nadat een print is gestart.",
             "GcodeThumbnails": "Gcode thumbnails",
             "GcodeThumbnailsDescription": "Klik op de knop om naar de instructies te gaan.",
             "Guide": "Richtlijnen",
@@ -864,9 +948,10 @@
         "WebcamsTab": {
             "AddWebcam": "voeg webcam toe",
             "CreateWebcam": "Nieuwe Webcam",
+            "EditCrowsnestConf": "Bewerk crowsnest.conf",
             "EditWebcam": "Bewerk Webcam",
-            "FlipHorizontally": "Flip webcam horizontaal",
-            "FlipVertically": "Flip webcam verticaal",
+            "FlipWebcam": "Flip webcam beeld:",
+            "Horizontally": "horizontaal",
             "IconBed": "Bed",
             "IconCam": "Camera",
             "IconDoor": "Deur",
@@ -881,6 +966,7 @@
             "Name": "Naam",
             "NameAlreadyExists": "Naam bestaat al",
             "Required": "verplicht",
+            "Rotate": "Roteer",
             "SaveWebcam": "Sla Webcam op",
             "Service": "Dienst",
             "TargetFPS": "Doel FPS",
@@ -888,6 +974,7 @@
             "UrlSnapshot": "URL Snapshot",
             "UrlStream": "URL Stream",
             "Uv4lMjpeg": "UV4L-MJPEG",
+            "Vertically": "verticaal",
             "Webcams": "Webcams"
         }
     },
@@ -901,6 +988,7 @@
         "Delete": "Verwijder",
         "DeleteDirectory": "Verwijder map",
         "DeleteDirectoryQuestion": "Weet je zeker dat je de \"{name}\" map wil verwijderen met alle inhoud?",
+        "DeleteSelectedQuestion": "Weet je zeker dat je {count} geselecteerde bestanden wil verwijderen?",
         "Download": "Download",
         "DuplicateLastframe": "Herhaal laatste frame",
         "Empty": "Geen voltooide timelapse gevonden.",

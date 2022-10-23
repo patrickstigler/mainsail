@@ -2,10 +2,11 @@ import Vue from 'vue'
 import { ActionTree } from 'vuex'
 import { SocketState } from '@/store/socket/types'
 import { RootState } from '@/store/types'
-import { v4 as uuidv4 } from 'uuid'
 
 export const actions: ActionTree<SocketState, RootState> = {
     reset({ commit }) {
+        commit('setDisconnected')
+        commit('clearLoadings')
         commit('reset')
     },
 
@@ -54,7 +55,8 @@ export const actions: ActionTree<SocketState, RootState> = {
 
             case 'notify_klippy_ready':
                 commit('server/setKlippyConnected', null, { root: true })
-                dispatch('printer/reset', null, { root: true })
+                dispatch('server/stopKlippyConnectedInterval', null, { root: true })
+                dispatch('server/stopKlippyStateInterval', null, { root: true })
                 dispatch('printer/init', null, { root: true })
                 break
 
@@ -123,9 +125,7 @@ export const actions: ActionTree<SocketState, RootState> = {
                 break
 
             default:
-                if (payload.result !== 'ok' && payload.error?.message)
-                    window.console.error('JSON-RPC: ' + payload.error.message)
-                else window.console.debug(payload)
+                window.console.debug(payload)
         }
     },
 
@@ -139,6 +139,14 @@ export const actions: ActionTree<SocketState, RootState> = {
 
     clearLoadings({ commit }) {
         commit('clearLoadings')
+    },
+
+    addInitModule({ commit }, payload: string) {
+        commit('addInitModule', payload)
+    },
+
+    removeInitModule({ commit }, payload: string) {
+        commit('removeInitModule', payload)
     },
 
     reportDebug(_, payload) {

@@ -16,8 +16,6 @@
             "DescriptionPreviouslyUnderVolted": "自上次通電後，樹莓派電源電壓至少有一次降至4.65V以下.",
             "DescriptionTemperatureLimitActive": "rPi uC （僅 3A+/3B+）溫度目前高於軟限制（默認 60C）。",
             "DescriptionUnderVoltageDetected": "樹莓派電源電壓目前低於4.65V",
-            "HeadlineCurrentFlags": "目前標記",
-            "HeadlinePreviouslyFlags": "以前的標記",
             "TitleCurrentlyThrottled": "目前被限制",
             "TitleFrequencyCapped": "頻率上限",
             "TitlePreviouslyFrequencyCapped": "以前的頻率上限",
@@ -69,12 +67,10 @@
         "SetupConsole": "設定控制台"
     },
     "Editor": {
-        "Cancel": "取消",
         "ConfigReference": "設定檔參考",
         "DontSave": "不儲存",
         "Downloading": "正在下載",
         "FailedSave": "{filename} 無法上傳!",
-        "Minimap": "顯示小地圖",
         "SaveClose": "保存並關閉",
         "SaveRestart": "保存並重新啟動",
         "SuccessfullySaved": "{filename} 保存成功.",
@@ -99,9 +95,6 @@
         "DeleteDirectory": "刪除目錄ˋ",
         "DeleteDirectoryQuestion": "您真的要刪除 \"{name}\" 目錄及其所有內容嗎？",
         "Download": "下載",
-        "Downloading": "下載中",
-        "DoYouWantToStartFilename": "確認打開 {filename}?",
-        "DropFilesToAddGcode": "拖曳並新增 Gcode",
         "EditFile": "編輯檔案",
         "Empty": "空的",
         "FilamentUsage": "耗材用量",
@@ -128,15 +121,12 @@
         "Search": "搜尋",
         "SetupCurrentList": "設置目前列表",
         "Slicer": "切片",
-        "StartJob": "開始列印",
-        "StartPrint": "開始列印",
         "SuccessfullyCreated": "{filename} 建立成功.",
         "SuccessfullyDeleted": "{filename} 刪除成功.",
         "SuccessfullyMoved": "{filename} 移動成功.",
         "SuccessfullyRenamed": "{filename} 重新命名成功.",
         "SuccessfullyUploaded": "{filename} 更新成功!",
         "Total": "總計",
-        "Uploading": "上傳中",
         "UploadNewGcode": "上傳新 Gcode",
         "Used": "已使用",
         "View3D": "View 3D"
@@ -181,8 +171,6 @@
             "Variance": "差異"
         },
         "DeleteBedMeshProfile": "刪除網床設定檔",
-        "Deleted": "已刪除",
-        "DoYouReallyWantToCalibrate": "你真的要開始平台校正嗎?",
         "DoYouReallyWantToDelete": "你真的要刪除\"{name}\"設定檔嗎 ?",
         "ErrorKlipperNotReady": "Klipper 沒有準備好, 高度圖已禁用.",
         "Flat": "平的",
@@ -196,7 +184,6 @@
         "Remove": "刪除",
         "Rename": "重新命名",
         "RenameBedMeshProfile": "重命名網床設定檔",
-        "Scale": "縮放",
         "TitleCalibrate": "校正新床網",
         "TitleClear": "清除網床",
         "TitleHomeAll": "全部歸零",
@@ -234,7 +221,6 @@
         "PrinttimeAvg": "平均列印時間",
         "Reprint": "重印",
         "Search": "搜尋",
-        "ShowStatusName": "顯示 \"{name}\" ({count})",
         "Slicer": "切片",
         "SlicerVersion": "切片版本",
         "StartTime": "開始時間",
@@ -293,16 +279,12 @@
             "Logfiles": "日誌檔案"
         },
         "SystemPanel": {
-            "Awake": "喚醒",
             "Constants": "常量",
-            "Frequency": "頻率",
             "HostDetails": "主機詳細訊息",
             "LastStats": "最後統計數據",
             "Load": "載入",
             "Memory": "內存",
-            "Os": "操作系統",
-            "SystemLoad": "系統負載",
-            "Version": "版本"
+            "SystemLoad": "系統負載"
         },
         "UpdatePanel": {
             "CheckForUpdates": "檢查更新",
@@ -331,6 +313,17 @@
         "ExtruderControlPanel": {
             "Extrude": "擠出",
             "ExtrusionFactor": "擠出係數",
+            "FirmwareRetractionSettings": {
+                "RetractLength": "回抽長度",
+                "RetractSpeed": "回抽速度",
+                "UnretractExtraLength": "退料長度",
+                "UnretractSpeed": "退料速度"
+            },
+            "PressureAdvanceSettings": {
+                "Advance": "推進",
+                "Extruder": "擠出機",
+                "SmoothTime": "平滑時間"
+            },
             "Retract": "回抽"
         },
         "FarmPrinterPanel": {
@@ -341,31 +334,16 @@
         "KlippyStatePanel": {
             "FirmwareRestart": "韌體重新啟動",
             "KlipperCheck": "請檢查Klipper服務是否運行並且已經設定UDS（Unix Domain Socket）。",
-            "KlippyState": "Klippy狀態: ",
             "MoonrakerCannotConnect": "Moonraker 不能連接 Klipper!",
             "Restart": "重新啟動"
         },
         "MachineSettingsPanel": {
-            "FirmwareRetractionSettings": {
-                "FirmwareRetraction": "韌體回抽",
-                "RetractLength": "回抽長度",
-                "RetractSpeed": "回抽速度",
-                "UnretractExtraLength": "退料長度",
-                "UnretractSpeed": "退料速度"
-            },
             "Headline": "機器設定",
             "MotionSettings": {
                 "Acceleration": "加速度",
                 "MaxAccelToDecel": "最大加速，到减速.",
-                "Motion": "運動",
                 "SquareCornerVelocity": "直角拐角速度",
                 "Velocity": "速度"
-            },
-            "PressureAdvanceSettings": {
-                "Advance": "推進",
-                "Extruder": "擠出機",
-                "PressureAdvance": "壓力推進控制",
-                "SmoothTime": "平滑時間"
             }
         },
         "MacrosPanel": {
@@ -391,12 +369,6 @@
                 "Disabled": "關閉",
                 "Empty": "空的"
             }
-        },
-        "MoonrakerStatePanel": {
-            "DownloadLog": "下載日誌",
-            "FollowingPluginHasAnError": "下面的外掛程式有一個錯誤:",
-            "MoonrakerErrorInfo": "載入moonraker時出現了一點問題. 請檢查日誌檔案並解決問題.",
-            "MoonrakerWarnings": "Moonraker 警告"
         },
         "PowerControlPanel": {
             "Error": "錯誤",
@@ -437,7 +409,6 @@
         "TemperaturePanel": {
             "AutoscaleChart": "自動縮放圖表",
             "Avg": "平均",
-            "Color": "顏色",
             "Cooldown": "冷卻",
             "Current": "目前",
             "Dataset": {
@@ -462,15 +433,11 @@
         "ToolheadControlPanel": {
             "Absolute": "絕對",
             "ALL": "所有",
-            "InvertX": "翻轉 X",
-            "InvertY": "翻轉 Y",
-            "InvertZ": "翻轉 Z",
             "PleaseConfigureSteps": "請設定步進",
             "Position": "位置",
             "QGL": "QGL",
             "Relative": "相對的",
             "SettingsInterfaceControl": "設定 > 界面 > 控制",
-            "SetupControls": "設定控制",
             "SpeedFactor": "速度係數",
             "ZTilt": "Z 傾斜"
         },
@@ -478,11 +445,9 @@
             "All": "全部",
             "FPS": "FPS",
             "Headline": "網路攝影機",
-            "UnknownWebcamService": "未知網絡攝影機服務",
-            "UrlNotAvailable": "地址無效"
+            "UnknownWebcamService": "未知網絡攝影機服務"
         },
         "ZoffsetPanel": {
-            "CurrentOffset": "目前偏移: ",
             "Headline": "Z-偏移",
             "Later": "最後的",
             "Ok": "好",
@@ -745,8 +710,6 @@
             "ConfirmOnPowerDeviceChangeDescription": "顯示設備電源更改的確認對話框",
             "DisplayCANCEL_PRINT": "關閉取消列印按鈕",
             "DisplayCANCEL_PRINTDescription": "一直顯示取消列印按鈕, 無需再次確認.",
-            "DisplayZOffset": "顯示Z偏移面板",
-            "DisplayZOffsetDescription": "否則，面板將僅在開始列印後顯示.",
             "GcodeThumbnails": "Gcode 縮圖",
             "GcodeThumbnailsDescription": "點擊按鈕進入說明。",
             "Guide": "指南",
@@ -767,8 +730,6 @@
             "AddWebcam": "新增攝影機",
             "CreateWebcam": "建立攝影機",
             "EditWebcam": "編輯攝影機",
-            "FlipHorizontally": "水平翻轉網絡攝影機",
-            "FlipVertically": "垂直翻轉網絡攝影機",
             "IconBed": "床",
             "IconCam": "攝影機",
             "IconDoor": "門",

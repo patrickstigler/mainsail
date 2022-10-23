@@ -1,6 +1,6 @@
 import Vue from 'vue'
 import { ActionTree } from 'vuex'
-import { GuiState } from '@/store/gui/types'
+import { GuiState, GuiStateLayoutoption } from '@/store/gui/types'
 import { RootState } from '@/store/types'
 import { getDefaultState } from './index'
 import { themeDir } from '@/store/variables'
@@ -13,6 +13,7 @@ export const actions: ActionTree<GuiState, RootState> = {
         dispatch('gcodehistory/reset')
         dispatch('macros/reset')
         dispatch('presets/reset')
+        dispatch('webcams/reset')
     },
 
     init() {
@@ -25,8 +26,29 @@ export const actions: ActionTree<GuiState, RootState> = {
         const mainsailUrl = baseUrl + '?namespace=mainsail'
 
         if ('remoteprinters' in payload.value) {
-            if (!rootState.remoteMode) dispatch('remoteprinters/initStore', payload.value.remoteprinters.printers)
+            if (rootState.instancesDB === 'moonraker')
+                dispatch('remoteprinters/initStore', payload.value.remoteprinters.printers)
             delete payload.value.remoteprinters
+        }
+
+        // delete currentPath if exists
+        if (
+            'view' in payload.value &&
+            'gcodefiles' in payload.value.view &&
+            'currentPath' in payload.value.view.gcodefiles
+        ) {
+            window.console.debug('remove currentPath from gui namespace')
+            await fetch(mainsailUrl + '&key=view.gcodefiles.currentPath', { method: 'DELETE' })
+        }
+
+        // delete currentPath if exists
+        if (
+            'view' in payload.value &&
+            'configfiles' in payload.value.view &&
+            'currentPath' in payload.value.view.configfiles
+        ) {
+            window.console.debug('remove currentPath from gui namespace')
+            await fetch(mainsailUrl + '&key=view.configfiles.currentPath', { method: 'DELETE' })
         }
 
         //update cooldownGcode from V2.0.1 to V2.1.0
@@ -63,7 +85,38 @@ export const actions: ActionTree<GuiState, RootState> = {
             delete payload.value.dashboard.nonExpandPanels
         }
 
-        commit('setData', payload.value)
+        //update tools to temperatures panel from V2.1.x to V2.2.0
+        if ('dashboard' in payload.value) {
+            const dashboard = payload.value.dashboard
+            const layouts = [
+                'mobileLayout',
+                'tabletLayout1',
+                'tabletLayout2',
+                'desktopLayout1',
+                'desktopLayout2',
+                'widescreenLayout1',
+                'widescreenLayout2',
+                'widescreenLayout3',
+            ]
+
+            layouts.forEach((layout) => {
+                if (layout in dashboard) {
+                    const index = dashboard[layout].findIndex((entry: GuiStateLayoutoption) => entry.name === 'tools')
+
+                    if (index !== -1) {
+                        dashboard[layout][index].name = 'temperature'
+
+                        dispatch('saveSetting', {
+                            name: 'dashboard.' + layout,
+                            value: dashboard[layout],
+                        })
+                    }
+                }
+            })
+        }
+
+        await commit('setData', payload.value)
+        await dispatch('socket/removeInitModule', 'gui/init', { root: true })
     },
 
     /*
@@ -157,16 +210,16 @@ export const actions: ActionTree<GuiState, RootState> = {
     setGcodefilesMetadata({ commit, dispatch, state }, data) {
         commit('setGcodefilesMetadata', data)
         dispatch('updateSettings', {
-            keyName: 'view.gcodefiles',
-            newVal: state.view.gcodefiles,
+            keyName: 'view.gcodefiles.hideMetadataColumns',
+            newVal: state.view.gcodefiles.hideMetadataColumns,
         })
     },
 
     setGcodefilesShowHiddenFiles({ commit, dispatch, state }, data) {
         commit('setGcodefilesShowHiddenFiles', data)
         dispatch('updateSettings', {
-            keyName: 'view.gcodefiles',
-            newVal: state.view.gcodefiles,
+            keyName: 'view.gcodefiles.showHiddenFiles',
+            newVal: state.view.gcodefiles.showHiddenFiles,
         })
     },
 
@@ -186,7 +239,7 @@ export const actions: ActionTree<GuiState, RootState> = {
         })
     },
 
-    async resetMoonrakerDB({ commit, dispatch, rootGetters }, payload) {
+    async resetMoonrakerDB({ rootGetters }, payload) {
         const baseUrl = rootGetters['socket/getUrl'] + '/server/database/item'
 
         const urlDefault =
@@ -253,7 +306,7 @@ export const actions: ActionTree<GuiState, RootState> = {
         window.location.reload()
     },
 
-    async backupMoonrakerDB({ commit, dispatch, rootGetters }, payload) {
+    async backupMoonrakerDB({ rootGetters }, payload) {
         const backup: any = {}
 
         const responseMainsail = await fetch(rootGetters['socket/getUrl'] + '/server/database/item?namespace=mainsail')
