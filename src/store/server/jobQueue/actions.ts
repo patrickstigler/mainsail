@@ -1,7 +1,7 @@
 import Vue from 'vue'
 import { ActionTree } from 'vuex'
-import {RootState} from '@/store/types'
-import {ServerJobQueueState} from '@/store/server/jobQueue/types'
+import { RootState } from '@/store/types'
+import { ServerJobQueueState } from '@/store/server/jobQueue/types'
 
 export const actions: ActionTree<ServerJobQueueState, RootState> = {
     reset({ commit }) {
@@ -9,17 +9,19 @@ export const actions: ActionTree<ServerJobQueueState, RootState> = {
     },
 
     init() {
-        Vue.$socket.emit('server.job_queue.status', { }, { action: 'server/jobQueue/getStatus' })
+        Vue.$socket.emit('server.job_queue.status', {}, { action: 'server/jobQueue/getStatus' })
     },
 
     getEvent({ commit }, payload) {
-        if ('updated_queue' in payload) commit('setQueuedJobs', payload.updated_queue)
+        if ('updated_queue' in payload && payload.updated_queue !== null) commit('setQueuedJobs', payload.updated_queue)
         if ('queue_state' in payload) commit('setQueueState', payload.queue_state)
     },
 
-    getStatus({ commit }, payload) {
-        if ('queued_jobs' in payload) commit('setQueuedJobs', payload.queued_jobs)
-        if ('queue_state' in payload) commit('setQueueState', payload.queue_state)
+    async getStatus({ commit, dispatch }, payload) {
+        if ('queued_jobs' in payload) await commit('setQueuedJobs', payload.queued_jobs)
+        if ('queue_state' in payload) await commit('setQueueState', payload.queue_state)
+
+        await dispatch('socket/removeInitModule', 'server/jobQueue/init', { root: true })
     },
 
     async addToQueue({ state }, filenames: string[]) {
@@ -35,11 +37,10 @@ export const actions: ActionTree<ServerJobQueueState, RootState> = {
     },
 
     start(_) {
-        Vue.$socket.emit('server.job_queue.start', { }, { loading: 'startJobqueue' })
+        Vue.$socket.emit('server.job_queue.start', {}, { loading: 'startJobqueue' })
     },
 
     pause(_) {
-        Vue.$socket.emit('server.job_queue.pause', { }, { loading: 'pauseJobqueue' })
-    }
-
+        Vue.$socket.emit('server.job_queue.pause', {}, { loading: 'pauseJobqueue' })
+    },
 }

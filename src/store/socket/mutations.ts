@@ -1,23 +1,26 @@
 import Vue from 'vue'
 import { getDefaultState } from './index'
-import {MutationTree} from 'vuex'
+import { MutationTree } from 'vuex'
 import { SocketState } from '@/store/socket/types'
 
 export const mutations: MutationTree<SocketState> = {
     reset(state) {
-        Object.assign(state, getDefaultState())
+        const defaults = getDefaultState()
+
+        Vue.set(state, 'initializationList', defaults.initializationList)
     },
 
-    setConnected (state) {
+    setConnected(state) {
         Vue.set(state, 'isConnected', true)
         Vue.set(state, 'isConnecting', false)
         Vue.set(state, 'connectingFailed', false)
     },
 
-    setDisconnected (state) {
+    setDisconnected(state) {
         Vue.set(state, 'isConnected', false)
         Vue.set(state, 'isConnecting', false)
         Vue.set(state, 'connectingFailed', true)
+        Vue.set(state, 'connection_id', null)
     },
 
     setData(state, payload) {
@@ -38,6 +41,24 @@ export const mutations: MutationTree<SocketState> = {
     },
 
     clearLoadings(state) {
-        if(state.loadings.length) state.loadings.splice(0, state.loadings.length)
-    }
+        if (state.loadings.length) Vue.set(state, 'loadings', [])
+    },
+
+    addInitModule(state, payload) {
+        const list = [...state.initializationList]
+        const index = list.indexOf(payload)
+        if (index > -1) return
+
+        list.push(payload)
+        Vue.set(state, 'initializationList', list)
+    },
+
+    removeInitModule(state, payload) {
+        const list = [...state.initializationList]
+        const index = list.indexOf(payload)
+        if (index === -1) return
+
+        list.splice(index, 1)
+        Vue.set(state, 'initializationList', list)
+    },
 }

@@ -1,6 +1,4 @@
-<style scoped>
-
-</style>
+<style scoped></style>
 
 <template>
     <v-dialog v-model="showDialog" persistent :width="400">
@@ -8,22 +6,17 @@
             <v-toolbar flat dense>
                 <v-toolbar-title>
                     <span class="subheading">
-                        <v-icon class="mdi mdi-connection" left></v-icon>
-                        <template v-if="connectingFailed">{{ $t("ConnectionDialog.Failed", {'host': formatHostname}) }}</template>
-                        <template v-else-if="isConnecting">{{ $t("ConnectionDialog.Connecting", {'host': formatHostname}) }}</template>
-                        <template v-else>{{ formatHostname }}</template>
+                        <v-icon left>{{ mdiConnection }}</v-icon>
+                        {{ titleText }}
                     </span>
                 </v-toolbar-title>
             </v-toolbar>
-            <v-card-text class="pt-5" v-if="isConnecting">
-                <v-progress-linear color="white" indeterminate></v-progress-linear>
-            </v-card-text>
-            <v-card-text class="pt-5" v-if="!isConnecting && connectingFailed">
+            <v-card-text v-if="connectingFailed" class="pt-5">
                 <connection-status :moonraker="false"></connection-status>
-                <p class="text-center mt-3">{{ $t("ConnectionDialog.CannotConnectTo", {'host': formatHostname}) }}</p>
+                <p class="text-center mt-3">{{ $t('ConnectionDialog.CannotConnectTo', { host: formatHostname }) }}</p>
                 <template v-if="counter > 2">
                     <v-divider class="my-3"></v-divider>
-                    <p>{{ $t("ConnectionDialog.CheckMoonrakerLog") }}</p>
+                    <p>{{ $t('ConnectionDialog.CheckMoonrakerLog') }}</p>
                     <ul>
                         <li>~/klipper_logs/moonraker.log</li>
                         <li>/tmp/moonraker.log</li>
@@ -31,26 +24,31 @@
                     <v-divider class="mt-4 mb-5"></v-divider>
                 </template>
                 <div class="text-center">
-                    <v-btn @click="reconnect" class="primary--text">{{ $t("ConnectionDialog.TryAgain") }}</v-btn>
+                    <v-btn class="primary--text" @click="reconnect">{{ $t('ConnectionDialog.TryAgain') }}</v-btn>
                 </div>
+            </v-card-text>
+            <v-card-text v-else class="pt-5">
+                <v-progress-linear color="white" indeterminate></v-progress-linear>
             </v-card-text>
         </v-card>
     </v-dialog>
 </template>
 
 <script lang="ts">
-
 import Component from 'vue-class-component'
 import { Mixins } from 'vue-property-decorator'
 import BaseMixin from '@/components/mixins/base'
 import ConnectionStatus from '@/components/ui/ConnectionStatus.vue'
+import { mdiConnection } from '@mdi/js'
 
 @Component({
     components: {
         ConnectionStatus,
-    }
+    },
 })
 export default class TheConnectingDialog extends Mixins(BaseMixin) {
+    mdiConnection = mdiConnection
+
     counter = 0
 
     get protocol() {
@@ -66,11 +64,7 @@ export default class TheConnectingDialog extends Mixins(BaseMixin) {
     }
 
     get formatHostname() {
-        return parseInt(this.port) !== 80 && this.port !== '' ? this.hostname+':'+this.port : this.hostname
-    }
-
-    get isConnected() {
-        return this.$store.state.socket.isConnected
+        return parseInt(this.port) !== 80 && this.port !== '' ? this.hostname + ':' + this.port : this.hostname
     }
 
     get isConnecting() {
@@ -82,7 +76,15 @@ export default class TheConnectingDialog extends Mixins(BaseMixin) {
     }
 
     get showDialog() {
-        return !this.isConnected
+        return true
+    }
+
+    get titleText() {
+        if (this.connectingFailed) return this.$t('ConnectionDialog.Failed', { host: this.formatHostname })
+        if (this.isConnecting) return this.$t('ConnectionDialog.Connecting', { host: this.formatHostname })
+        if (!this.guiIsReady) return this.$t('ConnectionDialog.Initializing')
+
+        return this.formatHostname
     }
 
     reconnect() {

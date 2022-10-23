@@ -1,7 +1,7 @@
 import Vue from 'vue'
-import {ActionTree} from 'vuex'
-import {PrinterState} from '@/store/printer/types'
-import {RootState} from '@/store/types'
+import { ActionTree } from 'vuex'
+import { PrinterState } from '@/store/printer/types'
+import { RootState } from '@/store/types'
 
 export const actions: ActionTree<PrinterState, RootState> = {
     reset({ commit }) {
@@ -10,8 +10,15 @@ export const actions: ActionTree<PrinterState, RootState> = {
         commit('socket/clearLoadings', null, { root: true })
     },
 
-    init() {
+    init({ dispatch }) {
         window.console.debug('init printer')
+        dispatch('reset')
+
+        dispatch('socket/addInitModule', 'printer/info', { root: true })
+        dispatch('socket/addInitModule', 'printer/initSubscripts', { root: true })
+        dispatch('socket/addInitModule', 'printer/initHelpList', { root: true })
+        dispatch('socket/addInitModule', 'printer/initTempHistory', { root: true })
+        dispatch('socket/addInitModule', 'server/gcode_store', { root: true })
 
         Vue.$socket.emit('printer.info', {}, { action: 'printer/getInfo' })
         Vue.$socket.emit('printer.objects.list', {}, { action: 'printer/initSubscripts' })
@@ -19,33 +26,40 @@ export const actions: ActionTree<PrinterState, RootState> = {
         Vue.$socket.emit('server.gcode_store', {}, { action: 'server/getGcodeStore' })
     },
 
-    getInfo({ commit }, payload) {
-        commit('server/setData', {
-            klippy_state: payload.state,
-            klippy_message: payload.state_message,
-        }, { root: true })
+    getInfo({ commit, dispatch }, payload) {
+        commit(
+            'server/setData',
+            {
+                klippy_state: payload.state,
+                klippy_message: payload.state_message,
+            },
+            { root: true }
+        )
 
         commit('setData', {
             hostname: payload.hostname,
             software_version: payload.software_version,
             cpu_info: payload.cpu_info,
         })
+
+        dispatch('socket/removeInitModule', 'printer/info', { root: true })
     },
 
-    initSubscripts(_, payload) {
+    initSubscripts({ dispatch }, payload) {
         let subscripts = {}
-        const blocklist = [
-            'menu',
-        ]
+        const blocklist = ['menu']
 
         payload.objects.forEach((key: string) => {
             const nameSplit = key.split(' ')
 
-            if (!blocklist.includes(nameSplit[0])) subscripts = {...subscripts, [key]: null }
+            if (!blocklist.includes(nameSplit[0])) subscripts = { ...subscripts, [key]: null }
         })
 
-        if (subscripts !== {}) Vue.$socket.emit('printer.objects.subscribe', { objects: subscripts }, { action: 'printer/getInitData' })
+        if (Object.keys(subscripts).length > 0)
+            Vue.$socket.emit('printer.objects.subscribe', { objects: subscripts }, { action: 'printer/getInitData' })
         else Vue.$socket.emit('server.temperature_store', {}, { action: 'printer/tempHistory/init' })
+
+        dispatch('socket/removeInitModule', 'printer/initSubscripts', { root: true })
     },
 
     getInitData({ dispatch }, payload) {
@@ -54,21 +68,62 @@ export const actions: ActionTree<PrinterState, RootState> = {
         Vue.$socket.emit('server.temperature_store', {}, { action: 'printer/tempHistory/init' })
     },
 
-    getData({ commit }, payload) {
+    getData({ commit, dispatch, state }, payload) {
         if ('status' in payload) payload = payload.status
         if ('requestParams' in payload) delete payload.requestParams
 
-        const webhooks = Object.keys(payload).findIndex(element => element === 'webhooks')
-        if (webhooks !== -1) {
-            this.dispatch('server/getData', { klippy_state: payload['webhooks'].state, klippy_message: payload['webhooks'].state_message }, { root: true })
+        if ('webhooks' in payload) {
+            this.dispatch(
+                'server/getData',
+                { klippy_state: payload.webhooks.state, klippy_message: payload.webhooks.state_message },
+                { root: true }
+            )
             delete payload.webhooks
+        }
+
+        if ('bed_mesh' in state && 'bed_mesh' in payload && 'profiles' in payload.bed_mesh) {
+            commit('setBedMeshProfiles', payload.bed_mesh.profiles)
+
+            delete payload.bed_mesh['profiles']
+        }
+
+        if (payload.configfile?.settings?.printer?.kinematics) {
+            dispatch(
+                'gui/updateGcodeviewerCache',
+                {
+                    kinematics: payload.configfile?.settings?.printer?.kinematics,
+                },
+                { root: true }
+            )
+        }
+
+        if (payload.toolhead?.axis_maximum) {
+            dispatch(
+                'gui/updateGcodeviewerCache',
+                {
+                    axis_maximum: payload.toolhead?.axis_maximum,
+                },
+                { root: true }
+            )
+        }
+
+        if (payload.toolhead?.axis_minimum) {
+            dispatch(
+                'gui/updateGcodeviewerCache',
+                {
+                    axis_minimum: payload.toolhead?.axis_minimum,
+                },
+                { root: true }
+            )
         }
 
         commit('setData', payload)
     },
 
-    initHelpList({ commit }, payload) {
+    initHelpList({ commit, dispatch }, payload) {
         commit('setHelplist', payload)
+
+        dispatch('socket/removeInitModule', 'printer/initHelpList', { root: true })
     },
 
     getEndstopStatus({ commit }, payload) {
@@ -87,5 +142,5 @@ export const actions: ActionTree<PrinterState, RootState> = {
         } else {
             Vue.$socket.emit('printer.gcode.script', { script: payload }, { loading: 'sendGcode' })
         }
-    }
+    },
 }

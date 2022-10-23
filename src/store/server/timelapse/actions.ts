@@ -1,7 +1,7 @@
 import Vue from 'vue'
 import { ActionTree } from 'vuex'
 import { ServerTimelapseState } from '@/store/server/timelapse/types'
-import {RootState} from '@/store/types'
+import { RootState } from '@/store/types'
 
 export const actions: ActionTree<ServerTimelapseState, RootState> = {
     reset({ commit }) {
@@ -9,41 +9,42 @@ export const actions: ActionTree<ServerTimelapseState, RootState> = {
     },
 
     init() {
-        Vue.$socket.emit('machine.timelapse.get_settings', {}, { action: 'server/timelapse/initSettings'})
-        Vue.$socket.emit('machine.timelapse.lastframeinfo', {}, { action: 'server/timelapse/initLastFrameinfo'})
+        Vue.$socket.emit('machine.timelapse.get_settings', {}, { action: 'server/timelapse/initSettings' })
+        Vue.$socket.emit('machine.timelapse.lastframeinfo', {}, { action: 'server/timelapse/initLastFrameinfo' })
     },
 
-    initSettings({ commit }, payload) {
+    async initSettings({ commit, dispatch }, payload) {
         if ('requestParams' in payload) delete payload.requestParams
 
-        commit('setSettings', payload)
+        await commit('setSettings', payload)
+        await dispatch('socket/removeInitModule', 'server/timelapse/init', { root: true })
     },
 
     initLastFrameinfo({ commit }, payload) {
         commit('setLastFrame', {
             count: payload.framecount,
-            file: payload.lastframefile
+            file: payload.lastframefile,
         })
     },
 
     getEvent({ commit }, payload) {
-        switch(payload.action) {
-        case 'newframe':
-            commit('setLastFrame', {
-                count: parseInt(payload.frame),
-                file: payload.framefile
-            })
-            break
+        switch (payload.action) {
+            case 'newframe':
+                commit('setLastFrame', {
+                    count: parseInt(payload.frame),
+                    file: payload.framefile,
+                })
+                break
 
-        case 'render':
-            if (payload.status === 'error') {
-                Vue.$toast.error(payload.msg)
-                commit('resetSnackbar')
-            } else commit('setRenderStatus', payload)
-            break
+            case 'render':
+                if (payload.status === 'error') {
+                    Vue.$toast.error(payload.msg)
+                    commit('resetSnackbar')
+                } else commit('setRenderStatus', payload)
+                break
 
-        default:
-            window.console.log('unknown timelapse event', payload)
+            default:
+                window.console.log('unknown timelapse event', payload)
         }
     },
 
@@ -53,5 +54,5 @@ export const actions: ActionTree<ServerTimelapseState, RootState> = {
 
     resetSnackbar({ commit }) {
         commit('resetSnackbar')
-    }
+    },
 }

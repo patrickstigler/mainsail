@@ -1,9 +1,9 @@
 import Vue from 'vue'
 import Vuex from 'vuex'
-import {actions} from '@/store/actions'
-import {mutations} from '@/store/mutations'
-import {getters} from '@/store/getters'
-import { RootState } from './types'
+import { actions } from '@/store/actions'
+import { mutations } from '@/store/mutations'
+import { getters } from '@/store/getters'
+import { ConfigJsonInstance, RootState } from './types'
 
 // load modules
 import { socket } from '@/store/socket'
@@ -19,9 +19,11 @@ Vue.use(Vuex)
 
 export const getDefaultState = (): RootState => {
     return {
-        packageVersion: process.env.PACKAGE_VERSION || '0.0.0',
-        debugMode: process.env.VUE_APP_DEBUG_MODE || false,
+        packageVersion: (import.meta.env.PACKAGE_VERSION as string) || '0.0.0',
+        debugMode: (import.meta.env.VUE_APP_DEBUG_MODE as boolean) || false,
         naviDrawer: null,
+        instancesDB: 'moonraker',
+        configInstances: [],
     }
 }
 
@@ -41,5 +43,5 @@ export default new Vuex.Store({
     },
     getters: getters,
     mutations: mutations,
-    actions: actions
+    actions: actions,
 })
